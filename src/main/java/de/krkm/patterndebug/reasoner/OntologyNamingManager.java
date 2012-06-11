@@ -1,6 +1,11 @@
 package de.krkm.patterndebug.reasoner;
 
-import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLNamedIndividual;
+import org.semanticweb.owlapi.model.OWLObjectProperty;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Set;
@@ -9,6 +14,8 @@ import java.util.Set;
  * Provides mappings from URIs contained in the ontology to numeric ids and vice-versa.
  */
 public class OntologyNamingManager {
+    private Logger log = LoggerFactory.getLogger(OntologyNamingManager.class);
+
     private HashMap<String, Integer> classToId = new HashMap<String, Integer>();
     private HashMap<Integer, String> idToClass = new HashMap<Integer, String>();
     private HashMap<String, Integer> propertyToId = new HashMap<String, Integer>();
@@ -30,6 +37,8 @@ public class OntologyNamingManager {
             idToClass.put(i, classes[i].getIRI().toString());
         }
 
+        log.debug("Number of concepts: {}", classToId.size());
+
         Set<OWLObjectProperty> objectPropertiesInSignature = ontology.getObjectPropertiesInSignature();
         OWLObjectProperty[] objectProperties = objectPropertiesInSignature
                 .toArray(new OWLObjectProperty[objectPropertiesInSignature.size()]);
@@ -39,6 +48,8 @@ public class OntologyNamingManager {
             idToProperty.put(i, objectProperties[i].getIRI().toString());
         }
 
+        log.debug("Number of properties: {}", propertyToId.size());
+
         Set<OWLNamedIndividual> instancesInSignature = ontology.getIndividualsInSignature();
         OWLNamedIndividual[] instances = instancesInSignature
                 .toArray(new OWLNamedIndividual[instancesInSignature.size()]);
@@ -47,6 +58,8 @@ public class OntologyNamingManager {
             instanceToId.put(instances[i].getIRI().toString(), i);
             idToInstance.put(i, instances[i].getIRI().toString());
         }
+
+        log.debug("Number of instances: {}", instanceToId.size());
     }
 
     /**
@@ -107,5 +120,32 @@ public class OntologyNamingManager {
      */
     public int getInstanceId(String iri) {
         return instanceToId.get(iri);
+    }
+
+    /**
+     * Returns the number of concepts contained in the ontology.
+     *
+     * @return number of concepts contained in the ontology
+     */
+    public int getNumberOfConcepts() {
+        return classToId.size();
+    }
+
+    /**
+     * Returns the number of properties contained in the ontology.
+     *
+     * @return number of properties contained in the ontology
+     */
+    public int getNumberOfProperties() {
+        return propertyToId.size();
+    }
+
+    /**
+     * Returns the number of instances contained in the ontology.
+     *
+     * @return number of instances contained in the ontology
+     */
+    public int getNumberOfInstances() {
+        return instanceToId.size();
     }
 }
