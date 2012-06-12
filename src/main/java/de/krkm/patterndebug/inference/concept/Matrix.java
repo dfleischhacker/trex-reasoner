@@ -16,6 +16,14 @@ public class Matrix {
 
     private boolean[][] matrix;
 
+    /**
+     * Initializes the matrix to work on the given ontology,
+     *
+     * @param ontology      ontology to work on
+     * @param reasoner      reasoner this matrix belongs to
+     * @param namingManager naming manager to resolve IRIs and IDs
+     * @param inferenceStep implementing class for inference
+     */
     public Matrix(OWLOntology ontology, Reasoner reasoner, OntologyNamingManager namingManager,
             InferenceStepProvider inferenceStep) {
         this.ontology = ontology;
@@ -58,7 +66,7 @@ public class Matrix {
     }
 
     /**
-     * Starts the materialization process
+     * Starts the materialization process using the inference step provider for this matrix
      */
     public void materialize() {
         boolean modified = true;
@@ -115,6 +123,11 @@ public class Matrix {
         return matrix[indexA][indexB];
     }
 
+    /**
+     * Returns the naming manager for this matrix
+     *
+     * @return the naming manager used for this matrix
+     */
     public OntologyNamingManager getNamingManager() {
         return namingManager;
     }
