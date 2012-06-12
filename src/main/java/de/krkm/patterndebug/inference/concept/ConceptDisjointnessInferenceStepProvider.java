@@ -25,7 +25,7 @@ public class ConceptDisjointnessInferenceStepProvider implements InferenceStepPr
                     }
                     if (!disjointClasses[i].isAnonymous() && !disjointClasses[j].isAnonymous()) {
                         matrix.set(disjointClasses[i].asOWLClass().getIRI().toString(),
-                                   disjointClasses[j].asOWLClass().getIRI().toString(), true);
+                                disjointClasses[j].asOWLClass().getIRI().toString(), true);
                     }
                 }
             }
@@ -49,10 +49,9 @@ public class ConceptDisjointnessInferenceStepProvider implements InferenceStepPr
     @Override
     public void printAxiom(Matrix matrix, int col, int row) {
         if (matrix.get(row, col)) {
-            System.out
-                  .println(matrix.getNamingManager().getConceptIRI(row) + " disjointWith " + matrix.getNamingManager()
-                                                                                                   .getConceptIRI(
-                                                                                                           col));
+            System.out.println(
+                    matrix.getNamingManager().getConceptIRI(row) + " disjointWith " + matrix.getNamingManager()
+                                                                                            .getConceptIRI(col));
         }
     }
 }

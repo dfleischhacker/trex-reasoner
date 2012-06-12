@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Encapsulates the reasoning service
+ *
  * @author Daniel Fleischhacker <daniel@informatik.uni-mannheim.de>
  */
 public class Reasoner {

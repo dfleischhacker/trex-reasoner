@@ -13,10 +13,11 @@ public class SubClassOfInferenceStepProvider implements InferenceStepProvider {
     public void initMatrix(OWLOntology ontology, Reasoner reasoner, Matrix matrix) {
         // stated subsumption
         for (OWLSubClassOfAxiom a : ontology.getAxioms(AxiomType.SUBCLASS_OF)) {
-            if (!a.getSubClass().isAnonymous() && ! a.getSuperClass().isAnonymous())
-            matrix.set(a.getSubClass().asOWLClass().getIRI().toString(),
-                       a.getSuperClass().asOWLClass().getIRI().toString(),
-                       true);
+            if (!a.getSubClass().isAnonymous() && !a.getSuperClass().isAnonymous()) {
+                matrix.set(a.getSubClass().asOWLClass().getIRI().toString(),
+                        a.getSuperClass().asOWLClass().getIRI().toString(),
+                        true);
+            }
         }
 
         // stated class equivalence
@@ -30,8 +31,8 @@ public class SubClassOfInferenceStepProvider implements InferenceStepProvider {
                         continue;
                     }
                     matrix.set(equivalentClasses[i].asOWLClass().getIRI().toString(),
-                               equivalentClasses[j].asOWLClass().getIRI().toString(),
-                               true);
+                            equivalentClasses[j].asOWLClass().getIRI().toString(),
+                            true);
                 }
             }
         }

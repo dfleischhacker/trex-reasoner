@@ -12,6 +12,6 @@ public class CLIOptions {
         return inputOntology;
     }
 
-    @Option(name="-i", usage="Ontology to perform reasoning on", required=true)
+    @Option(name = "-i", usage = "Ontology to perform reasoning on", required = true)
     private File inputOntology;
 }

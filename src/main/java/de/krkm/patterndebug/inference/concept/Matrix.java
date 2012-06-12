@@ -16,7 +16,8 @@ public class Matrix {
 
     private boolean[][] matrix;
 
-    public Matrix(OWLOntology ontology, Reasoner reasoner, OntologyNamingManager namingManager, InferenceStepProvider inferenceStep) {
+    public Matrix(OWLOntology ontology, Reasoner reasoner, OntologyNamingManager namingManager,
+            InferenceStepProvider inferenceStep) {
         this.ontology = ontology;
         this.reasoner = reasoner;
         this.inferenceStep = inferenceStep;
