@@ -28,7 +28,13 @@ public interface InferenceStepProvider {
     public boolean infer(Matrix matrix, int col, int row);
 
     /**
-     * Prints the axiom for the given matrix field
+     * Returns a string representation of the axiom for the given matrix field
+     *
+     * @param matrix matrix to return axiom representation for
+     * @param col    column of matrix to return axiom representation for
+     * @param row    row of matrix to return axiom representation for
+     * @return string containing the axiom representation for the given matrix field, null if the field does not
+     *         represent any axiom
      */
-    public void printAxiom(Matrix matrix, int col, int row);
+    public String getAxiomRepresentation(Matrix matrix, int col, int row);
 }

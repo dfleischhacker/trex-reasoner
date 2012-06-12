@@ -31,39 +31,58 @@ public class Reasoner {
         namingManager = new OntologyNamingManager(ontology);
 
         conceptSubsumption = new Matrix(ontology, this, namingManager, new SubClassOfInferenceStepProvider());
-        materializeConceptInferences();
+        materializeConceptSubsumption();
 
         conceptDisjointness = new Matrix(ontology, this, namingManager, new ConceptDisjointnessInferenceStepProvider());
-        materializeDisjointnessInferences();
+        materializeConceptDisjointness();
     }
 
     /**
-     * Starts materialization of concept-level inference
+     * Starts materialization derivable concept-subsumption axioms
      */
-    public void materializeConceptInferences() {
+    public void materializeConceptSubsumption() {
         System.out.println("========================= BEFORE =========================");
-        conceptSubsumption.printAxioms();
+        System.out.println(conceptSubsumption.getAxioms());
         System.out.println("========================= BEFORE =========================");
         conceptSubsumption.materialize();
         System.out.println("========================= AFTER  =========================");
-        conceptSubsumption.printAxioms();
+        System.out.println(conceptSubsumption.getAxioms());
         System.out.println("========================= AFTER  =========================");
     }
 
-    public void materializeDisjointnessInferences() {
+    /**
+     * Starts materializing derivable concept disjointness axioms
+     */
+    public void materializeConceptDisjointness() {
         System.out.println("========================= BEFORE =========================");
-        conceptDisjointness.printAxioms();
+        System.out.println(conceptDisjointness.getAxioms());
         System.out.println("========================= BEFORE =========================");
         conceptDisjointness.materialize();
         System.out.println("========================= AFTER  =========================");
-        conceptDisjointness.printAxioms();
+        System.out.println(conceptDisjointness.getAxioms());
         System.out.println("========================= AFTER  =========================");
     }
 
+    /**
+     * Returns true if the concept identified by the IRI <code>subClass</code> is a subconcept of the concept identified
+     * by the IRI <code>superClass</code>.
+     *
+     * @param subClass IRI of potential subconcept
+     * @param superClass IRI of potential superconcept
+     * @return true if subClass is subconcept of superClass
+     */
     public boolean isSubClassOf(String subClass, String superClass) {
         return conceptSubsumption.get(subClass, superClass);
     }
 
+    /**
+     * Returns true if the concept identified by the id <code>subClass</code> is a subconcept of the concept identified
+     * by the id <code>superClass</code>.
+     *
+     * @param subClass ID of potential subconcept
+     * @param superClass ID of potential superconcept
+     * @return true if subClass is subconcept of superClass
+     */
     public boolean isSubClassOf(int subClass, int superClass) {
         return conceptSubsumption.get(subClass, superClass);
     }

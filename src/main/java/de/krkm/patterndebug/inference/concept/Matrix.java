@@ -120,13 +120,21 @@ public class Matrix {
     }
 
     /**
-     * Prints all axioms contained in the matrix
+     * Returns a string containing all representations of axioms contained in this matrix.
+     *
+     * @return string representation of all axioms contained in this matrix
      */
-    public void printAxioms() {
+    public String getAxioms() {
+        StringBuilder sb = new StringBuilder();
         for (int i = 0; i < getDimension(); i++) {
             for (int j = 0; j < getDimension(); j++) {
-                inferenceStep.printAxiom(this, i, j);
+                String axiom = inferenceStep.getAxiomRepresentation(this, i, j);
+                if (axiom != null) {
+                    sb.append(axiom).append("\n");
+                }
             }
         }
+
+        return sb.toString();
     }
 }

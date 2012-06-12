@@ -44,7 +44,7 @@ public class SubClassOfInferenceStepProvider implements InferenceStepProvider {
             if (matrix.get(row, i) && matrix.get(i, col)) {
                 boolean mod = matrix.set(row, col, true);
                 if (mod) {
-                    printAxiom(matrix, row, col);
+                    getAxiomRepresentation(matrix, row, col);
                 }
                 return mod;
             }
@@ -54,12 +54,13 @@ public class SubClassOfInferenceStepProvider implements InferenceStepProvider {
     }
 
     @Override
-    public void printAxiom(Matrix matrix, int col, int row) {
+    public String getAxiomRepresentation(Matrix matrix, int col, int row) {
         if (matrix.get(row, col)) {
-            System.out.println(matrix.getNamingManager().getConceptIRI(row) + " subClassOf " + matrix.getNamingManager()
-                                                                                                     .getConceptIRI(
-                                                                                                             col));
+            return String.format("SubClassOf(<%s>, <%s>)", matrix.getNamingManager().getConceptIRI(row),
+                    matrix.getNamingManager()
+                          .getConceptIRI(col));
         }
+        return null;
     }
 
 
