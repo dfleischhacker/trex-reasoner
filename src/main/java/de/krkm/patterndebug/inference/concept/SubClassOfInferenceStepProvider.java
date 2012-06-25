@@ -1,9 +1,13 @@
 package de.krkm.patterndebug.inference.concept;
 
+import de.krkm.patterndebug.booleanexpressions.ExpressionMinimizer;
 import de.krkm.patterndebug.reasoner.Reasoner;
+import de.krkm.patterndebug.util.Util;
 import org.semanticweb.owlapi.model.*;
 
 import java.util.Set;
+
+import static de.krkm.patterndebug.booleanexpressions.ExpressionMinimizer.*;
 
 /**
  * Implements the inference step for SubClassOf axioms.
@@ -14,9 +18,13 @@ public class SubClassOfInferenceStepProvider implements InferenceStepProvider {
         // stated subsumption
         for (OWLSubClassOfAxiom a : ontology.getAxioms(AxiomType.SUBCLASS_OF)) {
             if (!a.getSubClass().isAnonymous() && !a.getSuperClass().isAnonymous()) {
-                matrix.set(a.getSubClass().asOWLClass().getIRI().toString(),
-                        a.getSuperClass().asOWLClass().getIRI().toString(),
-                        true);
+                String subClassIRI = Util.getFragment(a.getSubClass().asOWLClass().getIRI().toString());
+                String superClassIRI = Util.getFragment(a.getSuperClass().asOWLClass().getIRI().toString());
+                matrix.set(subClassIRI, superClassIRI, true);
+                int subId = matrix.getNamingManager().getConceptId(subClassIRI);
+                int superId = matrix.getNamingManager().getConceptId(superClassIRI);
+                matrix.addExplanation(subId, superId, or(and(literal(String.format("SubConceptOf(%s, %s)", subClassIRI,
+                        superClassIRI)))));
             }
         }
 
@@ -30,22 +38,28 @@ public class SubClassOfInferenceStepProvider implements InferenceStepProvider {
                     if (i == j) {
                         continue;
                     }
-                    matrix.set(equivalentClasses[i].asOWLClass().getIRI().toString(),
-                            equivalentClasses[j].asOWLClass().getIRI().toString(),
-                            true);
+                    String iriI = Util.getFragment(equivalentClasses[i].asOWLClass().getIRI().toString());
+                    int idI = matrix.getNamingManager().getConceptId(iriI);
+                    String iriJ = Util.getFragment(equivalentClasses[j].asOWLClass().getIRI().toString());
+                    int idJ = matrix.getNamingManager().getConceptId(iriJ);
+                    matrix.set(iriI, iriJ, true);
+                    matrix.addExplanation(idI, idJ,
+                            or(and(literal(String.format("SubConceptOf(%s, %s)", iriI, iriJ)))));
                 }
             }
         }
     }
 
     @Override
-    public boolean infer(Matrix matrix, int col, int row) {
+    public boolean infer(Matrix matrix, int row, int col) {
         for (int i = 0; i < matrix.getDimension(); i++) {
             if (matrix.get(row, i) && matrix.get(i, col)) {
                 boolean mod = matrix.set(row, col, true);
-                if (mod) {
-                    getAxiomRepresentation(matrix, row, col);
-                }
+//                if (mod) {
+//                    getAxiomRepresentation(matrix, row, col);
+//                }
+                matrix.addExplanation(row, col,
+                        ExpressionMinimizer.flatten(matrix.getExplanation(row, i), matrix.getExplanation(i, col)));
                 return mod;
             }
         }
@@ -54,14 +68,22 @@ public class SubClassOfInferenceStepProvider implements InferenceStepProvider {
     }
 
     @Override
-    public String getAxiomRepresentation(Matrix matrix, int col, int row) {
+    public String getAxiomRepresentation(Matrix matrix, int row, int col) {
         if (matrix.get(row, col)) {
-            return String.format("SubClassOf(<%s>, <%s>)", matrix.getNamingManager().getConceptIRI(row),
+            return String.format("SubClassOf(%s, %s)", matrix.getNamingManager().getConceptIRI(row),
                     matrix.getNamingManager()
                           .getConceptIRI(col));
         }
         return null;
     }
 
+    @Override
+    public String getIdentifier() {
+        return "SubClassOf";
+    }
 
+    @Override
+    public boolean isSymmetric() {
+        return true;
+    }
 }

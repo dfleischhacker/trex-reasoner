@@ -1,5 +1,7 @@
 package de.krkm.patterndebug.inference.concept;
 
+import de.krkm.patterndebug.booleanexpressions.ExpressionMinimizer;
+import de.krkm.patterndebug.booleanexpressions.OrExpression;
 import de.krkm.patterndebug.reasoner.OntologyNamingManager;
 import de.krkm.patterndebug.reasoner.Reasoner;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -15,6 +17,8 @@ public class Matrix {
     private OntologyNamingManager namingManager;
 
     private boolean[][] matrix;
+    private OrExpression[][] explanations;
+    private final int dimension;
 
     /**
      * Initializes the matrix to work on the given ontology,
@@ -31,7 +35,9 @@ public class Matrix {
         this.inferenceStep = inferenceStep;
         this.namingManager = namingManager;
 
-        matrix = new boolean[namingManager.getNumberOfConcepts()][namingManager.getNumberOfConcepts()];
+        dimension = namingManager.getNumberOfConcepts();
+        matrix = new boolean[dimension][dimension];
+        explanations = new OrExpression[dimension][dimension];
 
         inferenceStep.initMatrix(ontology, reasoner, this);
     }
@@ -42,7 +48,44 @@ public class Matrix {
      * @return dimension of the matrix
      */
     public int getDimension() {
-        return matrix.length;
+        return dimension;
+    }
+
+    /**
+     * Adds the given expression as explanation for the axiom in the given matrix cell.
+     *
+     * @param row    row of matrix cell
+     * @param col    column of matrix cell
+     * @param expression explanation for axiom
+     */
+    public void addExplanation(int row, int col, OrExpression expression) {
+        if (inferenceStep.isSymmetric() && row < col) {
+            int temp = col;
+            col = row;
+            row = temp;
+        }
+        if (explanations[row][col] == null) {
+            explanations[row][col] = new OrExpression();
+        }
+        explanations[row][col].getExpressions().addAll(expression.getExpressions());
+        //System.out.println(explanations[row][col]);
+        ExpressionMinimizer.minimize(explanations[row][col]);
+    }
+
+    /**
+     * Returns the explanation for the axiom in the given matrix cell.
+     *
+     * @param row row of matrix cell
+     * @param col column of matrix cell
+     * @return clause explanation for axiom
+     */
+    public OrExpression getExplanation(int row, int col) {
+        if (inferenceStep.isSymmetric() && row < col) {
+            int temp = col;
+            col = row;
+            row = temp;
+        }
+        return explanations[row][col];
     }
 
     /**
@@ -56,6 +99,12 @@ public class Matrix {
     public boolean set(String conceptA, String conceptB, boolean val) {
         int indexA = namingManager.getConceptId(conceptA);
         int indexB = namingManager.getConceptId(conceptB);
+
+        if (inferenceStep.isSymmetric() && indexA < indexB) {
+            int temp = indexB;
+            indexB = indexA;
+            indexA = temp;
+        }
 
         if (matrix[indexA][indexB] == val) {
             return false;
@@ -73,8 +122,8 @@ public class Matrix {
 
         while (modified) {
             modified = false;
-            for (int i = 0; i < getDimension(); i++) {
-                for (int j = 0; j < getDimension(); j++) {
+            for (int i = 0; i < dimension; i++) {
+                for (int j = 0; j < dimension; j++) {
                     modified = inferenceStep.infer(this, i, j);
                 }
             }
@@ -92,6 +141,12 @@ public class Matrix {
         int indexA = namingManager.getConceptId(conceptA);
         int indexB = namingManager.getConceptId(conceptB);
 
+        if (inferenceStep.isSymmetric() && indexA < indexB) {
+            int temp = indexB;
+            indexB = indexA;
+            indexA = temp;
+        }
+
         return matrix[indexA][indexB];
     }
 
@@ -108,6 +163,12 @@ public class Matrix {
             return false;
         }
 
+        if (inferenceStep.isSymmetric() && indexA < indexB) {
+            int temp = indexB;
+            indexB = indexA;
+            indexA = temp;
+        }
+
         matrix[indexA][indexB] = val;
         return true;
     }
@@ -120,6 +181,11 @@ public class Matrix {
      * @return value to for concept pair
      */
     public boolean get(int indexA, int indexB) {
+        if (inferenceStep.isSymmetric() && indexA < indexB) {
+            int temp = indexB;
+            indexB = indexA;
+            indexA = temp;
+        }
         return matrix[indexA][indexB];
     }
 
@@ -133,17 +199,29 @@ public class Matrix {
     }
 
     /**
+     * Returns the identifier for the axiom type managed by this matrix
+     *
+     * @return identifier for axiom type managed by this matrix
+     */
+    public String getAxiomTypeIdentifier() {
+        return inferenceStep.getIdentifier();
+    }
+
+    /**
      * Returns a string containing all representations of axioms contained in this matrix.
      *
      * @return string representation of all axioms contained in this matrix
      */
     public String getAxioms() {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < getDimension(); i++) {
-            for (int j = 0; j < getDimension(); j++) {
+        for (int i = 0; i < dimension; i++) {
+            for (int j = 0; j < (inferenceStep.isSymmetric() ? i : dimension); j++) {
                 String axiom = inferenceStep.getAxiomRepresentation(this, i, j);
+                if (axiom != null && axiom.isEmpty()) {
+                    System.out.println("EMPTY!! " + i + " -- " + j + ": " + namingManager.getConceptIRI(i) + " " + namingManager.getConceptIRI(j));
+                }
                 if (axiom != null) {
-                    sb.append(axiom).append("\n");
+                    sb.append(axiom).append(" -- ").append(explanations[i][j].toString()).append("\n");
                 }
             }
         }

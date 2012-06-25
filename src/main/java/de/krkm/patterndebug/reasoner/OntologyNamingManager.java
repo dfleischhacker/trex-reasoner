@@ -1,5 +1,6 @@
 package de.krkm.patterndebug.reasoner;
 
+import de.krkm.patterndebug.util.Util;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
@@ -33,8 +34,8 @@ public class OntologyNamingManager {
         OWLClass[] classes = classesInSignature.toArray(new OWLClass[classesInSignature.size()]);
 
         for (int i = 0; i < classes.length; i++) {
-            classToId.put(classes[i].getIRI().toString(), i);
-            idToClass.put(i, classes[i].getIRI().toString());
+            classToId.put(Util.getFragment(classes[i].getIRI().toString()), i);
+            idToClass.put(i, Util.getFragment(classes[i].getIRI().toString()));
         }
 
         log.debug("Number of concepts: {}", classToId.size());
@@ -44,8 +45,8 @@ public class OntologyNamingManager {
                 .toArray(new OWLObjectProperty[objectPropertiesInSignature.size()]);
 
         for (int i = 0; i < objectProperties.length; i++) {
-            propertyToId.put(objectProperties[i].getIRI().toString(), i);
-            idToProperty.put(i, objectProperties[i].getIRI().toString());
+            propertyToId.put(Util.getFragment(objectProperties[i].getIRI().toString()), i);
+            idToProperty.put(i, Util.getFragment(objectProperties[i].getIRI().toString()));
         }
 
         log.debug("Number of properties: {}", propertyToId.size());
@@ -55,8 +56,8 @@ public class OntologyNamingManager {
                 .toArray(new OWLNamedIndividual[instancesInSignature.size()]);
 
         for (int i = 0; i < instances.length; i++) {
-            instanceToId.put(instances[i].getIRI().toString(), i);
-            idToInstance.put(i, instances[i].getIRI().toString());
+            instanceToId.put(Util.getFragment(instances[i].getIRI().toString()), i);
+            idToInstance.put(i, Util.getFragment(instances[i].getIRI().toString()));
         }
 
         log.debug("Number of instances: {}", instanceToId.size());

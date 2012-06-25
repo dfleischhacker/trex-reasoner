@@ -3,39 +3,38 @@ package de.krkm.patterndebug.inference.concept;
 import de.krkm.patterndebug.booleanexpressions.ExpressionMinimizer;
 import de.krkm.patterndebug.reasoner.Reasoner;
 import de.krkm.patterndebug.util.Util;
-import org.semanticweb.owlapi.model.AxiomType;
-import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLDisjointClassesAxiom;
-import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.*;
 
 import java.util.Set;
 
 import static de.krkm.patterndebug.booleanexpressions.ExpressionMinimizer.*;
 
-public class ConceptDisjointnessInferenceStepProvider implements InferenceStepProvider {
+public class PropertyDisjointnessInferenceStepProvider implements InferenceStepProvider {
     private Reasoner reasoner;
 
     @Override
     public void initMatrix(OWLOntology ontology, Reasoner reasoner, Matrix matrix) {
         this.reasoner = reasoner;
-        Set<OWLDisjointClassesAxiom> disjointClassesAxiomSet = ontology.getAxioms(AxiomType.DISJOINT_CLASSES);
-        for (OWLDisjointClassesAxiom a : disjointClassesAxiomSet) {
-            Set<OWLClass> disjointClassesSet = a.getClassesInSignature();
-            OWLClass[] disjointClasses = disjointClassesSet.toArray(new OWLClass[disjointClassesSet.size()]);
-            for (int i = 0; i < disjointClasses.length; i++) {
-                for (int j = 0; j < i; j++) {
+        Set<OWLDisjointObjectPropertiesAxiom> disjointPropertyAxiomSet = ontology.getAxioms(
+                AxiomType.DISJOINT_OBJECT_PROPERTIES);
+        for (OWLDisjointObjectPropertiesAxiom a : disjointPropertyAxiomSet) {
+            Set<OWLObjectProperty> disjointPropertySet = a.getObjectPropertiesInSignature();
+            OWLObjectProperty[] disjointProperties = disjointPropertySet.toArray(
+                    new OWLObjectProperty[disjointPropertySet.size()]);
+            for (int i = 0; i < disjointProperties.length; i++) {
+                for (int j = 0; j < disjointProperties.length; j++) {
                     if (i == j) {
                         continue;
                     }
-                    if (!disjointClasses[i].isAnonymous() && !disjointClasses[j].isAnonymous()) {
-                        String iriI = Util.getFragment(disjointClasses[i].asOWLClass().getIRI().toString());
-                        String iriJ = Util.getFragment(disjointClasses[j].asOWLClass().getIRI().toString());
+                    if (!disjointProperties[i].isAnonymous() && !disjointProperties[j].isAnonymous()) {
+                        String iriI = Util.getFragment(disjointProperties[i].asOWLClass().getIRI().toString());
+                        String iriJ = Util.getFragment(disjointProperties[j].asOWLClass().getIRI().toString());
                         matrix.set(iriI, iriJ, true);
                         int idI = matrix.getNamingManager().getConceptId(iriI);
                         int idJ = matrix.getNamingManager().getConceptId(iriJ);
                         matrix.set(iriI, iriJ, true);
                         matrix.addExplanation(idI, idJ,
-                                or(and(literal(String.format("DisjointWith(%s, %s)", iriI, iriJ)))));
+                                or(and(literal(String.format("DisjointObjectProperty(%s, %s)", iriI, iriJ)))));
                     }
                 }
             }
@@ -48,8 +47,7 @@ public class ConceptDisjointnessInferenceStepProvider implements InferenceStepPr
             if (reasoner.isSubClassOf(row, i) && matrix.get(i, col)) {
                 boolean mod = matrix.set(row, col, true);
                 matrix.addExplanation(row, col,
-                        ExpressionMinimizer.flatten(reasoner.getConceptSubsumption().getExplanation(row, i),
-                                matrix.getExplanation(i, col)));
+                        ExpressionMinimizer.flatten(reasoner.getConceptSubsumption().getExplanation(row, i), matrix.getExplanation(i, col)));
                 return mod;
             }
         }
@@ -59,7 +57,7 @@ public class ConceptDisjointnessInferenceStepProvider implements InferenceStepPr
     @Override
     public String getAxiomRepresentation(Matrix matrix, int row, int col) {
         if (matrix.get(row, col)) {
-            return String.format("DisjointWith(<%s>, <%s>)", matrix.getNamingManager().getConceptIRI(row),
+            return String.format("DisjointObjectProperty(<%s>, <%s>)", matrix.getNamingManager().getConceptIRI(row),
                     matrix.getNamingManager().getConceptIRI(col));
         }
         return null;
@@ -67,7 +65,7 @@ public class ConceptDisjointnessInferenceStepProvider implements InferenceStepPr
 
     @Override
     public String getIdentifier() {
-        return "DisjointWith";
+        return "DisjointObjectProperty";
     }
 
     @Override
