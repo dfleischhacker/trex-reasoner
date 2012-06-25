@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Reasoner {
     private OWLOntology ontology;
+
     private OntologyNamingManager namingManager;
 
     private Logger log = LoggerFactory.getLogger(Reasoner.class);
@@ -168,5 +169,9 @@ public class Reasoner {
 
     public boolean areDisjointProperties(int property1, int property2) {
         return propertyDisjointness.get(property1, property2);
+    }
+
+    public OntologyNamingManager getNamingManager() {
+        return namingManager;
     }
 }

@@ -54,8 +54,8 @@ public class Matrix {
     /**
      * Adds the given expression as explanation for the axiom in the given matrix cell.
      *
-     * @param row    row of matrix cell
-     * @param col    column of matrix cell
+     * @param row        row of matrix cell
+     * @param col        column of matrix cell
      * @param expression explanation for axiom
      */
     public void addExplanation(int row, int col, OrExpression expression) {
@@ -97,8 +97,8 @@ public class Matrix {
      * @return true if the value has changed, i.e., was not val before
      */
     public boolean set(String conceptA, String conceptB, boolean val) {
-        int indexA = namingManager.getConceptId(conceptA);
-        int indexB = namingManager.getConceptId(conceptB);
+        int indexA = inferenceStep.resolveIRI(conceptA);
+        int indexB = inferenceStep.resolveIRI(conceptB);
 
         if (inferenceStep.isSymmetric() && indexA < indexB) {
             int temp = indexB;
@@ -138,8 +138,8 @@ public class Matrix {
      * @return value to for concept pair
      */
     public boolean get(String conceptA, String conceptB) {
-        int indexA = namingManager.getConceptId(conceptA);
-        int indexB = namingManager.getConceptId(conceptB);
+        int indexA = inferenceStep.resolveIRI(conceptA);
+        int indexB = inferenceStep.resolveIRI(conceptB);
 
         if (inferenceStep.isSymmetric() && indexA < indexB) {
             int temp = indexB;
@@ -217,9 +217,6 @@ public class Matrix {
         for (int i = 0; i < dimension; i++) {
             for (int j = 0; j < (inferenceStep.isSymmetric() ? i : dimension); j++) {
                 String axiom = inferenceStep.getAxiomRepresentation(this, i, j);
-                if (axiom != null && axiom.isEmpty()) {
-                    System.out.println("EMPTY!! " + i + " -- " + j + ": " + namingManager.getConceptIRI(i) + " " + namingManager.getConceptIRI(j));
-                }
                 if (axiom != null) {
                     sb.append(axiom).append(" -- ").append(explanations[i][j].toString()).append("\n");
                 }

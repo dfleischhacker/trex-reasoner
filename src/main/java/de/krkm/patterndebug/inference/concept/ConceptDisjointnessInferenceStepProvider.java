@@ -74,4 +74,14 @@ public class ConceptDisjointnessInferenceStepProvider implements InferenceStepPr
     public boolean isSymmetric() {
         return true;
     }
+
+    @Override
+    public int resolveIRI(String iri) {
+        return reasoner.getNamingManager().getConceptId(iri);
+    }
+
+    @Override
+    public String resolveID(int id) {
+        return reasoner.getNamingManager().getConceptIRI(id);
+    }
 }

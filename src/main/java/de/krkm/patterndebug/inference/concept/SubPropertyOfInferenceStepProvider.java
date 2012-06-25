@@ -14,18 +14,23 @@ import static de.krkm.patterndebug.booleanexpressions.ExpressionMinimizer.*;
  * Implements the inference step for SubClassOf axioms.
  */
 public class SubPropertyOfInferenceStepProvider implements InferenceStepProvider {
+    private Reasoner reasoner;
+
     @Override
     public void initMatrix(OWLOntology ontology, Reasoner reasoner, Matrix matrix) {
+        this.reasoner = reasoner;
         // stated subsumption
         for (OWLSubObjectPropertyOfAxiom a : ontology.getAxioms(AxiomType.SUB_OBJECT_PROPERTY)) {
             if (!a.getSubProperty().isAnonymous() && !a.getSuperProperty().isAnonymous()) {
                 String subPropertyIRI = Util.getFragment(a.getSubProperty().asOWLObjectProperty().getIRI().toString());
-                String superPropertyIRI = Util.getFragment(a.getSuperProperty().asOWLObjectProperty().getIRI().toString());
+                String superPropertyIRI = Util
+                        .getFragment(a.getSuperProperty().asOWLObjectProperty().getIRI().toString());
                 matrix.set(subPropertyIRI, superPropertyIRI, true);
-                int subId = matrix.getNamingManager().getConceptId(subPropertyIRI);
-                int superId = matrix.getNamingManager().getConceptId(superPropertyIRI);
-                matrix.addExplanation(subId, superId, or(and(literal(String.format("SubPropertyOf(%s, %s)", subPropertyIRI,
-                        superPropertyIRI)))));
+                int subId = matrix.getNamingManager().getPropertyId(subPropertyIRI);
+                int superId = matrix.getNamingManager().getPropertyId(superPropertyIRI);
+                matrix.addExplanation(subId, superId,
+                        or(and(literal(String.format("SubPropertyOf(%s, %s)", subPropertyIRI,
+                                superPropertyIRI)))));
             }
         }
 
@@ -33,13 +38,16 @@ public class SubPropertyOfInferenceStepProvider implements InferenceStepProvider
         for (OWLEquivalentObjectPropertiesAxiom equiv : ontology.getAxioms(AxiomType.EQUIVALENT_OBJECT_PROPERTIES)) {
             for (OWLSubObjectPropertyOfAxiom a : equiv.asSubObjectPropertyOfAxioms()) {
                 if (!a.getSubProperty().isAnonymous() && !a.getSuperProperty().isAnonymous()) {
-                    String subPropertyIRI = Util.getFragment(a.getSubProperty().asOWLObjectProperty().getIRI().toString());
-                    String superPropertyIRI = Util.getFragment(a.getSuperProperty().asOWLObjectProperty().getIRI().toString());
+                    String subPropertyIRI = Util
+                            .getFragment(a.getSubProperty().asOWLObjectProperty().getIRI().toString());
+                    String superPropertyIRI = Util
+                            .getFragment(a.getSuperProperty().asOWLObjectProperty().getIRI().toString());
                     matrix.set(subPropertyIRI, superPropertyIRI, true);
-                    int subId = matrix.getNamingManager().getConceptId(subPropertyIRI);
-                    int superId = matrix.getNamingManager().getConceptId(superPropertyIRI);
-                    matrix.addExplanation(subId, superId, or(and(literal(String.format("SubPropertyOf(%s, %s)", subPropertyIRI,
-                            superPropertyIRI)))));
+                    int subId = matrix.getNamingManager().getPropertyId(subPropertyIRI);
+                    int superId = matrix.getNamingManager().getPropertyId(superPropertyIRI);
+                    matrix.addExplanation(subId, superId,
+                            or(and(literal(String.format("SubPropertyOf(%s, %s)", subPropertyIRI,
+                                    superPropertyIRI)))));
                 }
             }
         }
@@ -67,7 +75,7 @@ public class SubPropertyOfInferenceStepProvider implements InferenceStepProvider
         if (matrix.get(row, col)) {
             return String.format("SubPropertyOf(%s, %s)", matrix.getNamingManager().getPropertyIRI(row),
                     matrix.getNamingManager()
-                          .getConceptIRI(col));
+                          .getPropertyIRI(col));
         }
         return null;
     }
@@ -80,5 +88,15 @@ public class SubPropertyOfInferenceStepProvider implements InferenceStepProvider
     @Override
     public boolean isSymmetric() {
         return false;
+    }
+
+    @Override
+    public int resolveIRI(String iri) {
+        return reasoner.getNamingManager().getPropertyId(iri);
+    }
+
+    @Override
+    public String resolveID(int id) {
+        return reasoner.getNamingManager().getPropertyIRI(id);
     }
 }

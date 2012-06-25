@@ -30,8 +30,8 @@ public class PropertyDisjointnessInferenceStepProvider implements InferenceStepP
                         String iriI = Util.getFragment(disjointProperties[i].asOWLClass().getIRI().toString());
                         String iriJ = Util.getFragment(disjointProperties[j].asOWLClass().getIRI().toString());
                         matrix.set(iriI, iriJ, true);
-                        int idI = matrix.getNamingManager().getConceptId(iriI);
-                        int idJ = matrix.getNamingManager().getConceptId(iriJ);
+                        int idI = matrix.getNamingManager().getPropertyId(iriI);
+                        int idJ = matrix.getNamingManager().getPropertyId(iriJ);
                         matrix.set(iriI, iriJ, true);
                         matrix.addExplanation(idI, idJ,
                                 or(and(literal(String.format("DisjointObjectProperty(%s, %s)", iriI, iriJ)))));
@@ -71,5 +71,16 @@ public class PropertyDisjointnessInferenceStepProvider implements InferenceStepP
     @Override
     public boolean isSymmetric() {
         return true;
+    }
+
+
+    @Override
+    public int resolveIRI(String iri) {
+        return reasoner.getNamingManager().getPropertyId(iri);
+    }
+
+    @Override
+    public String resolveID(int id) {
+        return reasoner.getNamingManager().getPropertyIRI(id);
     }
 }

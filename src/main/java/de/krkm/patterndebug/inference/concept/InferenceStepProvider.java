@@ -52,4 +52,14 @@ public interface InferenceStepProvider {
      * @return true if resulting matrix is symmetric
      */
     public boolean isSymmetric();
+
+    /**
+     * Resolves the given numerical ID to the corresponding IRI
+     */
+    public String resolveID(int id);
+
+    /**
+     * Resolves the given IRI to the corresponding ID
+     */
+    public int resolveIRI(String iri);
 }
