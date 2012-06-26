@@ -15,7 +15,7 @@ import static de.krkm.patterndebug.booleanexpressions.ExpressionMinimizer.*;
 /**
  * Implements the inference step for SubClassOf axioms.
  */
-public class SubClassOfInferenceStepProvider implements InferenceStepProvider {
+public class SubClassOfInferenceStepProvider extends InferenceStepProvider {
     private Reasoner reasoner;
 
     @Override
@@ -98,12 +98,12 @@ public class SubClassOfInferenceStepProvider implements InferenceStepProvider {
     }
 
     @Override
-    public int resolveIRI(String iri) {
+    public int resolveRowIRI(String iri) {
         return reasoner.getNamingManager().getConceptId(iri);
     }
 
     @Override
-    public String resolveID(int id) {
+    public String resolveRowID(int id) {
         return reasoner.getNamingManager().getConceptIRI(id);
     }
 }

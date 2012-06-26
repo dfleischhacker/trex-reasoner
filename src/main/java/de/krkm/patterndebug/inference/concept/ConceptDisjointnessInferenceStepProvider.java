@@ -15,7 +15,7 @@ import java.util.Set;
 
 import static de.krkm.patterndebug.booleanexpressions.ExpressionMinimizer.*;
 
-public class ConceptDisjointnessInferenceStepProvider implements InferenceStepProvider {
+public class ConceptDisjointnessInferenceStepProvider extends InferenceStepProvider {
     private Reasoner reasoner;
 
     @Override
@@ -83,12 +83,12 @@ public class ConceptDisjointnessInferenceStepProvider implements InferenceStepPr
     }
 
     @Override
-    public int resolveIRI(String iri) {
+    public int resolveRowIRI(String iri) {
         return reasoner.getNamingManager().getConceptId(iri);
     }
 
     @Override
-    public String resolveID(int id) {
+    public String resolveRowID(int id) {
         return reasoner.getNamingManager().getConceptIRI(id);
     }
 }
