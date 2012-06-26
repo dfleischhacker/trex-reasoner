@@ -32,13 +32,15 @@ public class Main {
         log.debug("Done loading ontology");
         log.debug("Initialize reasoner");
         Reasoner r = new Reasoner(ontology);
+        log.debug("Done initializing reasoner");
 
-        for (int i = 0; i < r.getConceptDisjointness().getDimension(); i++) {
+        // search for concepts disjoint to themselves
+        log.info("Searching for concepts disjoint to themselves");
+        for (int i = 0; i < r.getConceptDisjointness().getDimensionRow(); i++) {
             if (r.getConceptDisjointness().get(i, i)) {
                 System.out.println(
                         r.getNamingManager().getConceptIRI(i) + ": " + r.getConceptDisjointness().getExplanation(i, i));
             }
         }
-        log.debug("Done initializing reasoner");
     }
 }

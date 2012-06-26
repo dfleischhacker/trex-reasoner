@@ -1,9 +1,7 @@
 package de.krkm.patterndebug.reasoner;
 
-import de.krkm.patterndebug.inference.concept.ConceptDisjointnessInferenceStepProvider;
-import de.krkm.patterndebug.inference.concept.Matrix;
-import de.krkm.patterndebug.inference.concept.SubClassOfInferenceStepProvider;
-import de.krkm.patterndebug.inference.concept.SubPropertyOfInferenceStepProvider;
+import de.krkm.patterndebug.inference.Matrix;
+import de.krkm.patterndebug.inference.concept.*;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,52 +57,28 @@ public class Reasoner {
      * Starts materialization derivable concept-subsumption axioms
      */
     public void materializeConceptSubsumption() {
-        System.out.println("========================= BEFORE =========================");
-        System.out.println(conceptSubsumption.getAxioms());
-        System.out.println("========================= BEFORE =========================");
         conceptSubsumption.materialize();
-        System.out.println("========================= AFTER  =========================");
-        System.out.println(conceptSubsumption.getAxioms());
-        System.out.println("========================= AFTER  =========================");
     }
 
     /**
      * Starts materializing derivable concept disjointness axioms
      */
     public void materializeConceptDisjointness() {
-        System.out.println("========================= BEFORE =========================");
-        System.out.println(conceptDisjointness.getAxioms());
-        System.out.println("========================= BEFORE =========================");
         conceptDisjointness.materialize();
-        System.out.println("========================= AFTER  =========================");
-        System.out.println(conceptDisjointness.getAxioms());
-        System.out.println("========================= AFTER  =========================");
     }
 
     /**
      * Starts materialization derivable property-subsumption axioms
      */
     public void materializePropertySubsumption() {
-        System.out.println("========================= BEFORE =========================");
-        System.out.println(propertySubsumption.getAxioms());
-        System.out.println("========================= BEFORE =========================");
         propertySubsumption.materialize();
-        System.out.println("========================= AFTER  =========================");
-        System.out.println(propertySubsumption.getAxioms());
-        System.out.println("========================= AFTER  =========================");
     }
 
     /**
      * Starts materializing derivable property disjointness axioms
      */
     public void materializePropertyDisjointness() {
-        System.out.println("========================= BEFORE =========================");
-        System.out.println(propertyDisjointness.getAxioms());
-        System.out.println("========================= BEFORE =========================");
         propertyDisjointness.materialize();
-        System.out.println("========================= AFTER  =========================");
-        System.out.println(propertyDisjointness.getAxioms());
-        System.out.println("========================= AFTER  =========================");
     }
 
     /**

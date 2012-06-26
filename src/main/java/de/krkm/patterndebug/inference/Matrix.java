@@ -1,4 +1,4 @@
-package de.krkm.patterndebug.inference.concept;
+package de.krkm.patterndebug.inference;
 
 import de.krkm.patterndebug.booleanexpressions.ExpressionMinimizer;
 import de.krkm.patterndebug.booleanexpressions.OrExpression;
@@ -18,7 +18,6 @@ public class Matrix {
 
     private boolean[][] matrix;
     private OrExpression[][] explanations;
-    private final int dimension;
 
     /**
      * Initializes the matrix to work on the given ontology,
@@ -35,20 +34,37 @@ public class Matrix {
         this.inferenceStep = inferenceStep;
         this.namingManager = namingManager;
 
-        dimension = namingManager.getNumberOfConcepts();
-        matrix = new boolean[dimension][dimension];
-        explanations = new OrExpression[dimension][dimension];
+//        dimension = namingManager.getNumberOfConcepts();
+//        matrix = new boolean[dimensionRow][dimensionCol];
+//        explanations = new OrExpression[dimensionRow][dimensionCol];
 
         inferenceStep.initMatrix(ontology, reasoner, this);
     }
 
     /**
-     * Returns the dimension of the matrix. The matrix is a square matrix.
+     * Returns the row dimension of the matrix.
      *
-     * @return dimension of the matrix
+     * @return row dimension of the matrix
      */
-    public int getDimension() {
-        return dimension;
+    public int getDimensionRow() {
+        return matrix == null ? 0 : matrix.length;
+    }
+
+    /**
+     * Returns the column dimension of the matrix.
+     *
+     * @return column dimension of the matrix
+     */
+    public int getDimensionCol() {
+        return (matrix == null || matrix.length == 0) ? 0 : matrix[0].length;
+    }
+
+    public void setMatrix(boolean[][] matrix) {
+        this.matrix = matrix;
+    }
+
+    public void setExplanations(OrExpression[][] explanations) {
+        this.explanations = explanations;
     }
 
     /**
@@ -68,7 +84,6 @@ public class Matrix {
             explanations[row][col] = new OrExpression();
         }
         explanations[row][col].getExpressions().addAll(expression.getExpressions());
-        //System.out.println(explanations[row][col]);
         ExpressionMinimizer.minimize(explanations[row][col]);
     }
 
@@ -122,8 +137,8 @@ public class Matrix {
 
         while (modified) {
             modified = false;
-            for (int i = 0; i < dimension; i++) {
-                for (int j = 0; j < dimension; j++) {
+            for (int i = 0; i < getDimensionRow(); i++) {
+                for (int j = 0; j < getDimensionCol(); j++) {
                     modified = inferenceStep.infer(this, i, j);
                 }
             }
@@ -214,8 +229,8 @@ public class Matrix {
      */
     public String getAxioms() {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < dimension; i++) {
-            for (int j = 0; j < (inferenceStep.isSymmetric() ? i : dimension); j++) {
+        for (int i = 0; i < getDimensionRow(); i++) {
+            for (int j = 0; j < (inferenceStep.isSymmetric() ? i : getDimensionCol()); j++) {
                 String axiom = inferenceStep.getAxiomRepresentation(this, i, j);
                 if (axiom != null) {
                     sb.append(axiom).append(" -- ").append(explanations[i][j].toString()).append("\n");

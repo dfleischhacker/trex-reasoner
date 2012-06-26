@@ -1,9 +1,15 @@
 package de.krkm.patterndebug.inference.concept;
 
 import de.krkm.patterndebug.booleanexpressions.ExpressionMinimizer;
+import de.krkm.patterndebug.booleanexpressions.OrExpression;
+import de.krkm.patterndebug.inference.InferenceStepProvider;
+import de.krkm.patterndebug.inference.Matrix;
 import de.krkm.patterndebug.reasoner.Reasoner;
 import de.krkm.patterndebug.util.Util;
-import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.model.AxiomType;
+import org.semanticweb.owlapi.model.OWLDisjointObjectPropertiesAxiom;
+import org.semanticweb.owlapi.model.OWLObjectProperty;
+import org.semanticweb.owlapi.model.OWLOntology;
 
 import java.util.Set;
 
@@ -14,6 +20,10 @@ public class PropertyDisjointnessInferenceStepProvider implements InferenceStepP
 
     @Override
     public void initMatrix(OWLOntology ontology, Reasoner reasoner, Matrix matrix) {
+        int dimension = matrix.getNamingManager().getNumberOfConcepts();
+        matrix.setMatrix(new boolean[dimension][dimension]);
+        matrix.setExplanations(new OrExpression[dimension][dimension]);
+
         this.reasoner = reasoner;
         Set<OWLDisjointObjectPropertiesAxiom> disjointPropertyAxiomSet = ontology.getAxioms(
                 AxiomType.DISJOINT_OBJECT_PROPERTIES);
@@ -43,11 +53,12 @@ public class PropertyDisjointnessInferenceStepProvider implements InferenceStepP
 
     @Override
     public boolean infer(Matrix matrix, int row, int col) {
-        for (int i = 0; i < matrix.getDimension(); i++) {
+        for (int i = 0; i < matrix.getDimensionRow(); i++) {
             if (reasoner.isSubClassOf(row, i) && matrix.get(i, col)) {
                 boolean mod = matrix.set(row, col, true);
                 matrix.addExplanation(row, col,
-                        ExpressionMinimizer.flatten(reasoner.getConceptSubsumption().getExplanation(row, i), matrix.getExplanation(i, col)));
+                        ExpressionMinimizer.flatten(reasoner.getConceptSubsumption().getExplanation(row, i),
+                                matrix.getExplanation(i, col)));
                 return mod;
             }
         }

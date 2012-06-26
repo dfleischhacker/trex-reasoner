@@ -1,6 +1,9 @@
 package de.krkm.patterndebug.inference.concept;
 
 import de.krkm.patterndebug.booleanexpressions.ExpressionMinimizer;
+import de.krkm.patterndebug.booleanexpressions.OrExpression;
+import de.krkm.patterndebug.inference.InferenceStepProvider;
+import de.krkm.patterndebug.inference.Matrix;
 import de.krkm.patterndebug.reasoner.Reasoner;
 import de.krkm.patterndebug.util.Util;
 import org.semanticweb.owlapi.model.AxiomType;
@@ -18,6 +21,10 @@ public class SubPropertyOfInferenceStepProvider implements InferenceStepProvider
 
     @Override
     public void initMatrix(OWLOntology ontology, Reasoner reasoner, Matrix matrix) {
+        int dimension = matrix.getNamingManager().getNumberOfConcepts();
+        matrix.setMatrix(new boolean[dimension][dimension]);
+        matrix.setExplanations(new OrExpression[dimension][dimension]);
+
         this.reasoner = reasoner;
         // stated subsumption
         for (OWLSubObjectPropertyOfAxiom a : ontology.getAxioms(AxiomType.SUB_OBJECT_PROPERTY)) {
@@ -55,7 +62,7 @@ public class SubPropertyOfInferenceStepProvider implements InferenceStepProvider
 
     @Override
     public boolean infer(Matrix matrix, int row, int col) {
-        for (int i = 0; i < matrix.getDimension(); i++) {
+        for (int i = 0; i < matrix.getDimensionRow(); i++) {
             if (matrix.get(row, i) && matrix.get(i, col)) {
                 boolean mod = matrix.set(row, col, true);
 //                if (mod) {

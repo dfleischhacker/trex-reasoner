@@ -1,4 +1,4 @@
-package de.krkm.patterndebug.inference.concept;
+package de.krkm.patterndebug.inference;
 
 import de.krkm.patterndebug.reasoner.Reasoner;
 import org.semanticweb.owlapi.model.OWLOntology;

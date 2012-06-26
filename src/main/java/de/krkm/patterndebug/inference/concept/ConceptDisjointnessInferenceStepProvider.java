@@ -1,6 +1,9 @@
 package de.krkm.patterndebug.inference.concept;
 
 import de.krkm.patterndebug.booleanexpressions.ExpressionMinimizer;
+import de.krkm.patterndebug.booleanexpressions.OrExpression;
+import de.krkm.patterndebug.inference.InferenceStepProvider;
+import de.krkm.patterndebug.inference.Matrix;
 import de.krkm.patterndebug.reasoner.Reasoner;
 import de.krkm.patterndebug.util.Util;
 import org.semanticweb.owlapi.model.AxiomType;
@@ -18,6 +21,10 @@ public class ConceptDisjointnessInferenceStepProvider implements InferenceStepPr
     @Override
     public void initMatrix(OWLOntology ontology, Reasoner reasoner, Matrix matrix) {
         this.reasoner = reasoner;
+        int dimension = matrix.getNamingManager().getNumberOfConcepts();
+        matrix.setMatrix(new boolean[dimension][dimension]);
+        matrix.setExplanations(new OrExpression[dimension][dimension]);
+
         Set<OWLDisjointClassesAxiom> disjointClassesAxiomSet = ontology.getAxioms(AxiomType.DISJOINT_CLASSES);
         for (OWLDisjointClassesAxiom a : disjointClassesAxiomSet) {
             Set<OWLClass> disjointClassesSet = a.getClassesInSignature();
@@ -44,7 +51,7 @@ public class ConceptDisjointnessInferenceStepProvider implements InferenceStepPr
 
     @Override
     public boolean infer(Matrix matrix, int row, int col) {
-        for (int i = 0; i < matrix.getDimension(); i++) {
+        for (int i = 0; i < matrix.getDimensionRow(); i++) {
             if (reasoner.isSubClassOf(row, i) && matrix.get(i, col)) {
                 boolean mod = matrix.set(row, col, true);
                 matrix.addExplanation(row, col,
