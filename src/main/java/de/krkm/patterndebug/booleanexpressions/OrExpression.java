@@ -45,4 +45,35 @@ public class OrExpression extends BooleanExpression {
     public void addExpression(AndExpression expr) {
         expressions.add(expr);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        OrExpression that = (OrExpression) o;
+
+        if (!expressions.equals(that.expressions)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return expressions.hashCode();
+    }
+
+    public OrExpression copy() {
+        HashSet<AndExpression> ex = new HashSet<AndExpression>();
+        for (AndExpression e : expressions) {
+            ex.add(e.copy());
+        }
+        return new OrExpression(ex);
+    }
 }

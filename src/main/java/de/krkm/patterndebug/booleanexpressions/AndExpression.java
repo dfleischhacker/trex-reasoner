@@ -44,4 +44,31 @@ public class AndExpression extends BooleanExpression {
     public Set<BooleanExpression> getExpressions() {
         return expressions;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        AndExpression that = (AndExpression) o;
+
+        if (!expressions.equals(that.expressions)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return expressions.hashCode();
+    }
+
+    public AndExpression copy() {
+        return new AndExpression(new HashSet<BooleanExpression>(expressions));
+    }
 }

@@ -23,6 +23,8 @@ public class ExpressionMinimizer {
             }
         }
 
+        minimize(res);
+
         return res;
     }
 
