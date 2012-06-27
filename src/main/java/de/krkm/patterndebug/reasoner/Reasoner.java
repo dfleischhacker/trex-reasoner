@@ -1,10 +1,18 @@
 package de.krkm.patterndebug.reasoner;
 
 import de.krkm.patterndebug.inference.Matrix;
-import de.krkm.patterndebug.inference.concept.*;
+import de.krkm.patterndebug.inference.concept.ConceptDisjointnessInferenceStepProvider;
+import de.krkm.patterndebug.inference.concept.SubClassOfInferenceStepProvider;
+import de.krkm.patterndebug.inference.concept.SubPropertyOfInferenceStepProvider;
+import de.krkm.patterndebug.inference.property.PropertyDomainInferenceStepProvider;
+import de.krkm.patterndebug.inference.property.PropertyRangeInferenceStepProvider;
+import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Encapsulates the reasoning service
@@ -22,6 +30,8 @@ public class Reasoner {
     private Matrix conceptDisjointness;
     private Matrix propertySubsumption;
     private Matrix propertyDisjointness;
+    private Matrix propertyDomain;
+    private Matrix propertyRange;
 
     /**
      * Initializes the reasoner to perform inference on the given ontology.
@@ -38,11 +48,19 @@ public class Reasoner {
         materializeConceptDisjointness();
 
         propertySubsumption = new Matrix(ontology, this, namingManager, new SubPropertyOfInferenceStepProvider());
-        materializeConceptSubsumption();
+        materializePropertySubsumption();
 
         propertyDisjointness = new Matrix(ontology, this, namingManager,
                 new ConceptDisjointnessInferenceStepProvider());
-        materializeConceptDisjointness();
+        materializePropertyDisjointness();
+
+        propertyDomain = new Matrix(ontology, this, namingManager,
+                new PropertyDomainInferenceStepProvider());
+        materializePropertyDomain();
+
+        propertyRange = new Matrix(ontology, this, namingManager,
+                new PropertyRangeInferenceStepProvider());
+        materializePropertyRange();
     }
 
     public Matrix getConceptSubsumption() {
@@ -53,11 +71,28 @@ public class Reasoner {
         return conceptDisjointness;
     }
 
+    public Matrix getPropertySubsumption() {
+        return propertySubsumption;
+    }
+
+    public Matrix getPropertyDisjointness() {
+        return propertyDisjointness;
+    }
+
+    public Matrix getPropertyDomain() {
+        return propertyDomain;
+    }
+
+    public Matrix getPropertyRange() {
+        return propertyRange;
+    }
+
     /**
      * Starts materialization derivable concept-subsumption axioms
      */
     public void materializeConceptSubsumption() {
         conceptSubsumption.materialize();
+        System.out.println(conceptSubsumption.getAxioms());
     }
 
     /**
@@ -65,6 +100,7 @@ public class Reasoner {
      */
     public void materializeConceptDisjointness() {
         conceptDisjointness.materialize();
+        System.out.println(conceptDisjointness.getAxioms());
     }
 
     /**
@@ -79,6 +115,24 @@ public class Reasoner {
      */
     public void materializePropertyDisjointness() {
         propertyDisjointness.materialize();
+    }
+
+    /**
+     * Starts materializing derivable property disjointness axioms
+     */
+    public void materializePropertyDomain() {
+        System.out.println("=======================\n" + propertyDomain.getAxioms());
+        propertyDomain.materialize();
+        System.out.println("=======================\n" + propertyDomain.getAxioms());
+    }
+
+    /**
+     * Starts materializing derivable property disjointness axioms
+     */
+    public void materializePropertyRange() {
+        System.out.println("=======================\n" + propertyRange.getAxioms());
+        propertyRange.materialize();
+        System.out.println("=======================\n" + propertyRange.getAxioms());
     }
 
     /**
@@ -147,5 +201,21 @@ public class Reasoner {
 
     public OntologyNamingManager getNamingManager() {
         return namingManager;
+    }
+
+    /**
+     * Returns all axioms contained in this reasoner
+     * @return
+     */
+    public Set<OWLAxiom> getAxioms() {
+        HashSet<OWLAxiom> res = new HashSet<OWLAxiom>();
+        res.addAll(conceptSubsumption.getOWLAxioms());
+        res.addAll(conceptDisjointness.getOWLAxioms());
+        res.addAll(propertySubsumption.getOWLAxioms());
+        res.addAll(propertyDomain.getOWLAxioms());
+        res.addAll(propertyDisjointness.getOWLAxioms());
+        res.addAll(propertyRange.getOWLAxioms());
+
+        return res;
     }
 }
