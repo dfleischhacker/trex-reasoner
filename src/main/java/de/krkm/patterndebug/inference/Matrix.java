@@ -4,7 +4,11 @@ import de.krkm.patterndebug.booleanexpressions.ExpressionMinimizer;
 import de.krkm.patterndebug.booleanexpressions.OrExpression;
 import de.krkm.patterndebug.reasoner.OntologyNamingManager;
 import de.krkm.patterndebug.reasoner.Reasoner;
+import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Base class for concept level inference
@@ -242,5 +246,22 @@ public class Matrix {
         }
 
         return sb.toString();
+    }
+
+    /**
+     * Returns the set of all axioms contained in this matrix
+     */
+    public Set<OWLAxiom> getOWLAxioms() {
+        Set<OWLAxiom> axioms = new HashSet<OWLAxiom>();
+        for (int i = 0; i < getDimensionRow(); i++) {
+            for (int j = 0; j < (inferenceStep.isSymmetric() ? i : getDimensionCol()); j++) {
+                OWLAxiom axiom = inferenceStep.getAxiom(this, i, j);
+                if (axiom != null) {
+                    axioms.add(axiom);
+                }
+            }
+        }
+
+        return axioms;
     }
 }

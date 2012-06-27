@@ -6,17 +6,16 @@ import de.krkm.patterndebug.inference.InferenceStepProvider;
 import de.krkm.patterndebug.inference.Matrix;
 import de.krkm.patterndebug.reasoner.Reasoner;
 import de.krkm.patterndebug.util.Util;
-import org.semanticweb.owlapi.model.AxiomType;
-import org.semanticweb.owlapi.model.OWLDisjointObjectPropertiesAxiom;
-import org.semanticweb.owlapi.model.OWLObjectProperty;
-import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.*;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import static de.krkm.patterndebug.booleanexpressions.ExpressionMinimizer.*;
 
 public class PropertyDisjointnessInferenceStepProvider extends InferenceStepProvider {
     private Reasoner reasoner;
+    private OWLDataFactory factory;
 
     @Override
     public void initMatrix(OWLOntology ontology, Reasoner reasoner, Matrix matrix) {
@@ -25,6 +24,7 @@ public class PropertyDisjointnessInferenceStepProvider extends InferenceStepProv
         matrix.setExplanations(new OrExpression[dimension][dimension]);
 
         this.reasoner = reasoner;
+        this.factory = ontology.getOWLOntologyManager().getOWLDataFactory();
         Set<OWLDisjointObjectPropertiesAxiom> disjointPropertyAxiomSet = ontology.getAxioms(
                 AxiomType.DISJOINT_OBJECT_PROPERTIES);
         for (OWLDisjointObjectPropertiesAxiom a : disjointPropertyAxiomSet) {
@@ -70,6 +70,16 @@ public class PropertyDisjointnessInferenceStepProvider extends InferenceStepProv
         if (matrix.get(row, col)) {
             return String.format("DisjointObjectProperty(%s, %s)", matrix.getNamingManager().getConceptIRI(row),
                     matrix.getNamingManager().getConceptIRI(col));
+        }
+        return null;
+    }
+
+    public OWLAxiom getAxiom(Matrix matrix, int row, int col) {
+        if (matrix.get(row, col)) {
+            HashSet<OWLObjectProperty> props = new HashSet<OWLObjectProperty>();
+            props.add(factory.getOWLObjectProperty(IRI.create(getIRIWithNamespace(matrix.getNamingManager().getPropertyIRI(row)))));
+            props.add(factory.getOWLObjectProperty(IRI.create(getIRIWithNamespace(matrix.getNamingManager().getPropertyIRI(col)))));
+            return factory.getOWLDisjointObjectPropertiesAxiom();
         }
         return null;
     }

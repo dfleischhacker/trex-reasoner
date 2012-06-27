@@ -6,10 +6,7 @@ import de.krkm.patterndebug.inference.InferenceStepProvider;
 import de.krkm.patterndebug.inference.Matrix;
 import de.krkm.patterndebug.reasoner.Reasoner;
 import de.krkm.patterndebug.util.Util;
-import org.semanticweb.owlapi.model.AxiomType;
-import org.semanticweb.owlapi.model.OWLEquivalentObjectPropertiesAxiom;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLSubObjectPropertyOfAxiom;
+import org.semanticweb.owlapi.model.*;
 
 import static de.krkm.patterndebug.booleanexpressions.ExpressionMinimizer.*;
 
@@ -18,6 +15,7 @@ import static de.krkm.patterndebug.booleanexpressions.ExpressionMinimizer.*;
  */
 public class SubPropertyOfInferenceStepProvider extends InferenceStepProvider {
     private Reasoner reasoner;
+    private OWLDataFactory factory;
 
     @Override
     public void initMatrix(OWLOntology ontology, Reasoner reasoner, Matrix matrix) {
@@ -26,6 +24,7 @@ public class SubPropertyOfInferenceStepProvider extends InferenceStepProvider {
         matrix.setExplanations(new OrExpression[dimension][dimension]);
 
         this.reasoner = reasoner;
+        this.factory = ontology.getOWLOntologyManager().getOWLDataFactory();
         // stated subsumption
         for (OWLSubObjectPropertyOfAxiom a : ontology.getAxioms(AxiomType.SUB_OBJECT_PROPERTY)) {
             if (!a.getSubProperty().isAnonymous() && !a.getSuperProperty().isAnonymous()) {
@@ -80,6 +79,16 @@ public class SubPropertyOfInferenceStepProvider extends InferenceStepProvider {
             return String.format("SubPropertyOf(%s, %s)", matrix.getNamingManager().getPropertyIRI(row),
                     matrix.getNamingManager()
                           .getPropertyIRI(col));
+        }
+        return null;
+    }
+
+    @Override
+    public OWLAxiom getAxiom(Matrix matrix, int row, int col) {
+        if (matrix.get(row, col)) {
+            return factory.getOWLSubObjectPropertyOfAxiom(
+                    factory.getOWLObjectProperty(IRI.create(getIRIWithNamespace(matrix.getNamingManager().getPropertyIRI(row)))),
+                    factory.getOWLObjectProperty(IRI.create(getIRIWithNamespace(matrix.getNamingManager().getPropertyIRI(col)))));
         }
         return null;
     }

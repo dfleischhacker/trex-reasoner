@@ -17,6 +17,7 @@ import static de.krkm.patterndebug.booleanexpressions.ExpressionMinimizer.*;
  */
 public class SubClassOfInferenceStepProvider extends InferenceStepProvider {
     private Reasoner reasoner;
+    private OWLDataFactory factory;
 
     @Override
     public void initMatrix(OWLOntology ontology, Reasoner reasoner, Matrix matrix) {
@@ -25,6 +26,7 @@ public class SubClassOfInferenceStepProvider extends InferenceStepProvider {
         matrix.setExplanations(new OrExpression[dimension][dimension]);
 
         this.reasoner = reasoner;
+        this.factory = ontology.getOWLOntologyManager().getOWLDataFactory();
         // stated subsumption
         for (OWLSubClassOfAxiom a : ontology.getAxioms(AxiomType.SUBCLASS_OF)) {
             if (!a.getSubClass().isAnonymous() && !a.getSuperClass().isAnonymous()) {
@@ -91,12 +93,22 @@ public class SubClassOfInferenceStepProvider extends InferenceStepProvider {
 
     @Override
     public boolean isSymmetric() {
-        return true;
+        return false;
     }
 
     @Override
     public int resolveRowIRI(String iri) {
         return reasoner.getNamingManager().getConceptId(iri);
+    }
+
+    @Override
+    public OWLAxiom getAxiom(Matrix matrix, int row, int col) {
+        if (matrix.get(row, col)) {
+            return factory.getOWLSubClassOfAxiom(
+                    factory.getOWLClass(IRI.create(getIRIWithNamespace(matrix.getNamingManager().getConceptIRI(row)))),
+                    factory.getOWLClass(IRI.create(getIRIWithNamespace(matrix.getNamingManager().getConceptIRI(col)))));
+        }
+        return null;
     }
 
     @Override

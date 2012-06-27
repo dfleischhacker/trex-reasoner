@@ -6,21 +6,21 @@ import de.krkm.patterndebug.inference.InferenceStepProvider;
 import de.krkm.patterndebug.inference.Matrix;
 import de.krkm.patterndebug.reasoner.Reasoner;
 import de.krkm.patterndebug.util.Util;
-import org.semanticweb.owlapi.model.AxiomType;
-import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLDisjointClassesAxiom;
-import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.*;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import static de.krkm.patterndebug.booleanexpressions.ExpressionMinimizer.*;
 
 public class ConceptDisjointnessInferenceStepProvider extends InferenceStepProvider {
     private Reasoner reasoner;
+    private OWLDataFactory factory;
 
     @Override
     public void initMatrix(OWLOntology ontology, Reasoner reasoner, Matrix matrix) {
         this.reasoner = reasoner;
+        this.factory = ontology.getOWLOntologyManager().getOWLDataFactory();
         int dimension = matrix.getNamingManager().getNumberOfConcepts();
         matrix.setMatrix(new boolean[dimension][dimension]);
         matrix.setExplanations(new OrExpression[dimension][dimension]);
@@ -53,7 +53,7 @@ public class ConceptDisjointnessInferenceStepProvider extends InferenceStepProvi
     public boolean infer(Matrix matrix, int row, int col) {
         boolean mod = false;
         for (int i = 0; i < matrix.getDimensionRow(); i++) {
-            if (reasoner.isSubClassOf(row, i) && matrix.get(i, col)) {
+            if (reasoner.isSubClassOf(row, i) && matrix.get(col, i)) {
                 matrix.set(row, col, true);
                 mod = matrix.addExplanation(row, col,
                         ExpressionMinimizer.flatten(reasoner.getConceptSubsumption().getExplanation(row, i),
@@ -68,6 +68,19 @@ public class ConceptDisjointnessInferenceStepProvider extends InferenceStepProvi
         if (matrix.get(row, col)) {
             return String.format("DisjointWith(%s, %s)", matrix.getNamingManager().getConceptIRI(row),
                     matrix.getNamingManager().getConceptIRI(col));
+        }
+        return null;
+    }
+
+    @Override
+    public OWLAxiom getAxiom(Matrix matrix, int row, int col) {
+        if (matrix.get(row, col)) {
+            HashSet<OWLClass> concepts = new HashSet<OWLClass>();
+            concepts.add(factory.getOWLClass(IRI.create(getIRIWithNamespace(
+                    matrix.getNamingManager().getConceptIRI(row)))));
+            concepts.add(factory.getOWLClass(IRI.create(getIRIWithNamespace(
+                    matrix.getNamingManager().getConceptIRI(col)))));
+            return factory.getOWLDisjointClassesAxiom(concepts);
         }
         return null;
     }
