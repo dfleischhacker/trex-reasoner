@@ -73,8 +73,9 @@ public class Matrix {
      * @param row        row of matrix cell
      * @param col        column of matrix cell
      * @param expression explanation for axiom
+     * @return true if the explanation for the given cell has changed, otherwise false
      */
-    public void addExplanation(int row, int col, OrExpression expression) {
+    public boolean addExplanation(int row, int col, OrExpression expression) {
         if (inferenceStep.isSymmetric() && row < col) {
             int temp = col;
             col = row;
@@ -83,8 +84,10 @@ public class Matrix {
         if (explanations[row][col] == null) {
             explanations[row][col] = new OrExpression();
         }
+        OrExpression prev = explanations[row][col];
         explanations[row][col].getExpressions().addAll(expression.getExpressions());
         ExpressionMinimizer.minimize(explanations[row][col]);
+        return !prev.equals(expression);
     }
 
     /**
@@ -112,8 +115,8 @@ public class Matrix {
      * @return true if the value has changed, i.e., was not val before
      */
     public boolean set(String conceptA, String conceptB, boolean val) {
-        int indexA = inferenceStep.resolveIRI(conceptA);
-        int indexB = inferenceStep.resolveIRI(conceptB);
+        int indexA = inferenceStep.resolveRowIRI(conceptA);
+        int indexB = inferenceStep.resolveColIRI(conceptB);
 
         if (inferenceStep.isSymmetric() && indexA < indexB) {
             int temp = indexB;
@@ -153,8 +156,8 @@ public class Matrix {
      * @return value to for concept pair
      */
     public boolean get(String conceptA, String conceptB) {
-        int indexA = inferenceStep.resolveIRI(conceptA);
-        int indexB = inferenceStep.resolveIRI(conceptB);
+        int indexA = inferenceStep.resolveRowIRI(conceptA);
+        int indexB = inferenceStep.resolveColIRI(conceptB);
 
         if (inferenceStep.isSymmetric() && indexA < indexB) {
             int temp = indexB;
