@@ -16,9 +16,11 @@ import static de.krkm.patterndebug.booleanexpressions.ExpressionMinimizer.*;
 public class PropertyDisjointnessInferenceStepProvider extends InferenceStepProvider {
     private Reasoner reasoner;
     private OWLDataFactory factory;
+    private Matrix matrix;
 
     @Override
     public void initMatrix(OWLOntology ontology, Reasoner reasoner, Matrix matrix) {
+        this.matrix = matrix;
         int dimension = matrix.getNamingManager().getNumberOfConcepts();
         matrix.setMatrix(new boolean[dimension][dimension]);
         matrix.setExplanations(new OrExpression[dimension][dimension]);
@@ -77,8 +79,10 @@ public class PropertyDisjointnessInferenceStepProvider extends InferenceStepProv
     public OWLAxiom getAxiom(Matrix matrix, int row, int col) {
         if (matrix.get(row, col)) {
             HashSet<OWLObjectProperty> props = new HashSet<OWLObjectProperty>();
-            props.add(factory.getOWLObjectProperty(IRI.create(getIRIWithNamespace(matrix.getNamingManager().getPropertyIRI(row)))));
-            props.add(factory.getOWLObjectProperty(IRI.create(getIRIWithNamespace(matrix.getNamingManager().getPropertyIRI(col)))));
+            props.add(factory.getOWLObjectProperty(IRI.create(getIRIWithNamespace(
+                    matrix.getNamingManager().getPropertyIRI(row)))));
+            props.add(factory.getOWLObjectProperty(IRI.create(getIRIWithNamespace(
+                    matrix.getNamingManager().getPropertyIRI(col)))));
             return factory.getOWLDisjointObjectPropertiesAxiom();
         }
         return null;
@@ -103,5 +107,36 @@ public class PropertyDisjointnessInferenceStepProvider extends InferenceStepProv
     @Override
     public String resolveRowID(int id) {
         return reasoner.getNamingManager().getPropertyIRI(id);
+    }
+
+    @Override
+    public AxiomType getAxiomType() {
+        return AxiomType.DISJOINT_OBJECT_PROPERTIES;
+    }
+
+    @Override
+    public boolean isEntailed(OWLAxiom axiom) {
+        isProcessable(axiom);
+
+        boolean res = false;
+        Set<OWLObjectProperty> disjointPropertySet = axiom.getObjectPropertiesInSignature();
+        OWLObjectProperty[] disjointClasses = disjointPropertySet.toArray(
+                new OWLObjectProperty[disjointPropertySet.size()]);
+        for (int i = 0; i < disjointClasses.length; i++) {
+            for (int j = 0; j < i; j++) {
+                if (i == j) {
+                    continue;
+                }
+                String iriI = Util.getFragment(disjointClasses[i].asOWLClass().getIRI().toString());
+                String iriJ = Util.getFragment(disjointClasses[j].asOWLClass().getIRI().toString());
+                res = matrix.get(iriI, iriJ) || res;
+
+                if (res) {
+                    return true;
+                }
+            }
+        }
+
+        return res;
     }
 }

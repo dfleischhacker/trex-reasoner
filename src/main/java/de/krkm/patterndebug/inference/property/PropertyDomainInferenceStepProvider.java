@@ -16,11 +16,14 @@ import static de.krkm.patterndebug.booleanexpressions.ExpressionMinimizer.*;
 public class PropertyDomainInferenceStepProvider extends InferenceStepProvider {
     private Reasoner reasoner;
     private OWLDataFactory factory;
+    private Matrix matrix;
 
     @Override
     public void initMatrix(OWLOntology ontology, Reasoner reasoner, Matrix matrix) {
         this.reasoner = reasoner;
         this.factory = ontology.getOWLOntologyManager().getOWLDataFactory();
+
+        this.matrix = matrix;
 
         int dimensionCol = matrix.getNamingManager().getNumberOfConcepts();
         int dimensionRow = matrix.getNamingManager().getNumberOfProperties();
@@ -115,9 +118,26 @@ public class PropertyDomainInferenceStepProvider extends InferenceStepProvider {
     public OWLAxiom getAxiom(Matrix matrix, int row, int col) {
         if (matrix.get(row, col)) {
             return factory.getOWLObjectPropertyDomainAxiom(
-                    factory.getOWLObjectProperty(IRI.create(getIRIWithNamespace(matrix.getNamingManager().getPropertyIRI(row)))),
+                    factory.getOWLObjectProperty(
+                            IRI.create(getIRIWithNamespace(matrix.getNamingManager().getPropertyIRI(row)))),
                     factory.getOWLClass(IRI.create(getIRIWithNamespace(matrix.getNamingManager().getConceptIRI(col)))));
         }
         return null;
+    }
+
+    @Override
+    public AxiomType getAxiomType() {
+        return AxiomType.OBJECT_PROPERTY_DOMAIN;
+    }
+
+    @Override
+    public boolean isEntailed(OWLAxiom axiom) {
+        isProcessable(axiom);
+
+        OWLObjectPropertyDomainAxiom a = (OWLObjectPropertyDomainAxiom) axiom;
+
+        String propertyIRI = Util.getFragment(a.getProperty().asOWLObjectProperty().getIRI().toString());
+        String domainIRI = Util.getFragment(a.getDomain().asOWLClass().getIRI().toString());
+        return matrix.get(propertyIRI, domainIRI);
     }
 }

@@ -16,12 +16,15 @@ import static de.krkm.patterndebug.booleanexpressions.ExpressionMinimizer.*;
 public class SubPropertyOfInferenceStepProvider extends InferenceStepProvider {
     private Reasoner reasoner;
     private OWLDataFactory factory;
+    private Matrix matrix;
 
     @Override
     public void initMatrix(OWLOntology ontology, Reasoner reasoner, Matrix matrix) {
         int dimension = matrix.getNamingManager().getNumberOfConcepts();
         matrix.setMatrix(new boolean[dimension][dimension]);
         matrix.setExplanations(new OrExpression[dimension][dimension]);
+
+        this.matrix = matrix;
 
         this.reasoner = reasoner;
         this.factory = ontology.getOWLOntologyManager().getOWLDataFactory();
@@ -111,5 +114,21 @@ public class SubPropertyOfInferenceStepProvider extends InferenceStepProvider {
     @Override
     public String resolveRowID(int id) {
         return reasoner.getNamingManager().getPropertyIRI(id);
+    }
+
+    @Override
+    public AxiomType getAxiomType() {
+        return AxiomType.SUB_OBJECT_PROPERTY;
+    }
+
+    @Override
+    public boolean isEntailed(OWLAxiom axiom) {
+        isProcessable(axiom);
+
+        OWLSubObjectPropertyOfAxiom a = (OWLSubObjectPropertyOfAxiom) axiom;
+
+        String subClassIRI = Util.getFragment(a.getSubProperty().asOWLObjectProperty().getIRI().toString());
+        String superClassIRI = Util.getFragment(a.getSuperProperty().asOWLObjectProperty().getIRI().toString());
+        return matrix.get(subClassIRI, superClassIRI);
     }
 }

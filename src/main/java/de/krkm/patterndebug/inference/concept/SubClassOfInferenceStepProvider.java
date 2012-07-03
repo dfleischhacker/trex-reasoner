@@ -18,12 +18,15 @@ import static de.krkm.patterndebug.booleanexpressions.ExpressionMinimizer.*;
 public class SubClassOfInferenceStepProvider extends InferenceStepProvider {
     private Reasoner reasoner;
     private OWLDataFactory factory;
+    private Matrix matrix;
 
     @Override
     public void initMatrix(OWLOntology ontology, Reasoner reasoner, Matrix matrix) {
         int dimension = matrix.getNamingManager().getNumberOfConcepts();
         matrix.setMatrix(new boolean[dimension][dimension]);
         matrix.setExplanations(new OrExpression[dimension][dimension]);
+
+        this.matrix = matrix;
 
         this.reasoner = reasoner;
         this.factory = ontology.getOWLOntologyManager().getOWLDataFactory();
@@ -65,6 +68,7 @@ public class SubClassOfInferenceStepProvider extends InferenceStepProvider {
     @Override
     public boolean infer(Matrix matrix, int row, int col) {
         boolean mod = false;
+        log.debug("Inferencing for {} {}", row, col);
         for (int i = 0; i < matrix.getDimensionRow(); i++) {
             if (matrix.get(row, i) && matrix.get(i, col)) {
                 matrix.set(row, col, true);
@@ -114,5 +118,21 @@ public class SubClassOfInferenceStepProvider extends InferenceStepProvider {
     @Override
     public String resolveRowID(int id) {
         return reasoner.getNamingManager().getConceptIRI(id);
+    }
+
+    @Override
+    public AxiomType getAxiomType() {
+        return AxiomType.SUBCLASS_OF;
+    }
+
+    @Override
+    public boolean isEntailed(OWLAxiom axiom) {
+        isProcessable(axiom);
+
+        OWLSubClassOfAxiom a = (OWLSubClassOfAxiom) axiom;
+
+        String subClassIRI = Util.getFragment(a.getSubClass().asOWLClass().getIRI().toString());
+        String superClassIRI = Util.getFragment(a.getSuperClass().asOWLClass().getIRI().toString());
+        return matrix.get(subClassIRI, superClassIRI);
     }
 }

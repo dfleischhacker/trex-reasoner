@@ -16,10 +16,12 @@ import static de.krkm.patterndebug.booleanexpressions.ExpressionMinimizer.*;
 public class ConceptDisjointnessInferenceStepProvider extends InferenceStepProvider {
     private Reasoner reasoner;
     private OWLDataFactory factory;
+    private Matrix matrix;
 
     @Override
     public void initMatrix(OWLOntology ontology, Reasoner reasoner, Matrix matrix) {
         this.reasoner = reasoner;
+        this.matrix = matrix;
         this.factory = ontology.getOWLOntologyManager().getOWLDataFactory();
         int dimension = matrix.getNamingManager().getNumberOfConcepts();
         matrix.setMatrix(new boolean[dimension][dimension]);
@@ -103,5 +105,36 @@ public class ConceptDisjointnessInferenceStepProvider extends InferenceStepProvi
     @Override
     public String resolveRowID(int id) {
         return reasoner.getNamingManager().getConceptIRI(id);
+    }
+
+    @Override
+    public AxiomType getAxiomType() {
+        return AxiomType.DISJOINT_CLASSES;
+    }
+
+    @Override
+    public boolean isEntailed(OWLAxiom axiom) {
+        isProcessable(axiom);
+
+        boolean res = false;
+        Set<OWLClass> disjointClassesSet = axiom.getClassesInSignature();
+        OWLClass[] disjointClasses = disjointClassesSet.toArray(new OWLClass[disjointClassesSet.size()]);
+        for (int i = 0; i < disjointClasses.length; i++) {
+            for (int j = 0; j < i; j++) {
+                if (i == j) {
+                    continue;
+                }
+                String iriI = Util.getFragment(disjointClasses[i].asOWLClass().getIRI().toString());
+                String iriJ = Util.getFragment(disjointClasses[j].asOWLClass().getIRI().toString());
+                res = matrix.get(iriI, iriJ) || res;
+
+                // if entailed: stop processing
+                if (res) {
+                    return true;
+                }
+            }
+        }
+
+        return res;
     }
 }

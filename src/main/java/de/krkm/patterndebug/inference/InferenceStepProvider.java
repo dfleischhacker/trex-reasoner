@@ -1,13 +1,19 @@
 package de.krkm.patterndebug.inference;
 
 import de.krkm.patterndebug.reasoner.Reasoner;
+import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Provides interface for encapsulating simple inference steps applicable to matrix representations.
  */
 public abstract class InferenceStepProvider {
+    protected final static Logger log = LoggerFactory.getLogger(InferenceStepProvider.class);
+
     /**
      * Uses the given ontology for initializing the matrix. In most cases this means adding explicitly stated knowledge
      * into the matrix.
@@ -95,4 +101,38 @@ public abstract class InferenceStepProvider {
     public String getIRIWithNamespace(String iri) {
         return "http://www.semanticweb.org/daniel/ontologies/2012/5/untitled-ontology-6#" + iri;
     }
+
+    /**
+     * Returns the axiom type handled by this inference step provider
+     *
+     * @return axiom type handled by this inference step provider
+     */
+    public abstract AxiomType getAxiomType();
+
+    /**
+     * Checks if the given axiom is of the supported axiom type and if all used entities are non-anonymous ones.
+     *
+     * @param axiom axiom to check
+     */
+    public void isProcessable(OWLAxiom axiom) {
+        if (axiom.getAxiomType() != getAxiomType()) {
+            throw new UnsupportedOperationException(
+                    "InferenceStepProvider unable to handle axiom type + " + axiom.getAxiomType());
+        }
+
+        for (OWLEntity e : axiom.getSignature()) {
+            if (e.isOWLClass() && e.asOWLClass().isAnonymous()) {
+                throw new UnsupportedOperationException("Anonymous classes are not supported");
+            }
+
+            if (e.isOWLObjectProperty() && e.asOWLObjectProperty().isAnonymous()) {
+                throw new UnsupportedOperationException("Anonymous classes are not supported");
+            }
+        }
+    }
+
+    /**
+     * Returns true if the given axiom is entailed
+     */
+    public abstract boolean isEntailed(OWLAxiom axiom);
 }

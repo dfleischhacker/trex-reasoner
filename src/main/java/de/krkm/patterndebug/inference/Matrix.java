@@ -4,8 +4,11 @@ import de.krkm.patterndebug.booleanexpressions.ExpressionMinimizer;
 import de.krkm.patterndebug.booleanexpressions.OrExpression;
 import de.krkm.patterndebug.reasoner.OntologyNamingManager;
 import de.krkm.patterndebug.reasoner.Reasoner;
+import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -22,6 +25,8 @@ public class Matrix {
 
     private boolean[][] matrix;
     private OrExpression[][] explanations;
+
+    private final static Logger log = LoggerFactory.getLogger(Matrix.class);
 
     /**
      * Initializes the matrix to work on the given ontology,
@@ -42,7 +47,9 @@ public class Matrix {
 //        matrix = new boolean[dimensionRow][dimensionCol];
 //        explanations = new OrExpression[dimensionRow][dimensionCol];
 
+        log.debug("Initializing matrix {}", inferenceStep.getIdentifier());
         inferenceStep.initMatrix(ontology, reasoner, this);
+        log.debug("Done initializing matrix {}", inferenceStep.getIdentifier());
     }
 
     /**
@@ -128,6 +135,7 @@ public class Matrix {
             indexA = temp;
         }
 
+
         if (matrix[indexA][indexB] == val) {
             return false;
         }
@@ -140,9 +148,12 @@ public class Matrix {
      * Starts the materialization process using the inference step provider for this matrix
      */
     public void materialize() {
+        log.debug("Materializing matrix {}", inferenceStep.getIdentifier());
         boolean modified = true;
 
+        int run = 0;
         while (modified) {
+            log.debug("Inference for {}, iteration {}", inferenceStep.getIdentifier(), run++);
             modified = false;
             for (int i = 0; i < getDimensionRow(); i++) {
                 for (int j = 0; j < getDimensionCol(); j++) {
@@ -150,6 +161,8 @@ public class Matrix {
                 }
             }
         }
+
+        log.debug("Done materializing matrix {}", inferenceStep.getIdentifier());
     }
 
     /**
@@ -263,5 +276,21 @@ public class Matrix {
         }
 
         return axioms;
+    }
+
+    /**
+     * Returns the axiom type handled by this matrix
+     *
+     * @return axiom type handled by this matrix
+     */
+    public AxiomType getAxiomType() {
+        return inferenceStep.getAxiomType();
+    }
+
+    /**
+     * Returns true if the given axiom is entailed by this matrix
+     */
+    public boolean isEntailed(OWLAxiom axiom) {
+        return inferenceStep.isEntailed(axiom);
     }
 }

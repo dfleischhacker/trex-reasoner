@@ -2,15 +2,18 @@ package de.krkm.patterndebug.reasoner;
 
 import de.krkm.patterndebug.inference.Matrix;
 import de.krkm.patterndebug.inference.concept.ConceptDisjointnessInferenceStepProvider;
+import de.krkm.patterndebug.inference.concept.PropertyDisjointnessInferenceStepProvider;
 import de.krkm.patterndebug.inference.concept.SubClassOfInferenceStepProvider;
 import de.krkm.patterndebug.inference.concept.SubPropertyOfInferenceStepProvider;
 import de.krkm.patterndebug.inference.property.PropertyDomainInferenceStepProvider;
 import de.krkm.patterndebug.inference.property.PropertyRangeInferenceStepProvider;
+import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -33,6 +36,9 @@ public class Reasoner {
     private Matrix propertyDomain;
     private Matrix propertyRange;
 
+    private HashMap<AxiomType, Matrix> typeToMatrix = new HashMap<AxiomType, Matrix>();
+
+
     /**
      * Initializes the reasoner to perform inference on the given ontology.
      *
@@ -42,25 +48,33 @@ public class Reasoner {
         this.ontology = ontology;
         namingManager = new OntologyNamingManager(ontology);
         conceptSubsumption = new Matrix(ontology, this, namingManager, new SubClassOfInferenceStepProvider());
+        registerType(conceptSubsumption);
         materializeConceptSubsumption();
 
         conceptDisjointness = new Matrix(ontology, this, namingManager, new ConceptDisjointnessInferenceStepProvider());
+        registerType(conceptDisjointness);
         materializeConceptDisjointness();
 
         propertySubsumption = new Matrix(ontology, this, namingManager, new SubPropertyOfInferenceStepProvider());
+        registerType(propertySubsumption);
         materializePropertySubsumption();
 
         propertyDisjointness = new Matrix(ontology, this, namingManager,
-                new ConceptDisjointnessInferenceStepProvider());
+                new PropertyDisjointnessInferenceStepProvider());
+        registerType(propertyDisjointness);
         materializePropertyDisjointness();
 
         propertyDomain = new Matrix(ontology, this, namingManager,
                 new PropertyDomainInferenceStepProvider());
+        registerType(propertyDomain);
         materializePropertyDomain();
 
         propertyRange = new Matrix(ontology, this, namingManager,
                 new PropertyRangeInferenceStepProvider());
+        registerType(propertyRange);
         materializePropertyRange();
+
+
     }
 
     public Matrix getConceptSubsumption() {
@@ -85,6 +99,19 @@ public class Reasoner {
 
     public Matrix getPropertyRange() {
         return propertyRange;
+    }
+
+    public void registerType(Matrix matrix) {
+        typeToMatrix.put(matrix.getAxiomType(), matrix);
+    }
+
+    public boolean isEntailed(OWLAxiom axiom) {
+        Matrix relevantMatrix = typeToMatrix.get(axiom.getAxiomType());
+        if (relevantMatrix == null) {
+            throw new UnsupportedOperationException("Reasoner unable to handle axiom type: " + axiom.getAxiomType());
+        }
+
+        return relevantMatrix.isEntailed(axiom);
     }
 
     /**
@@ -205,6 +232,7 @@ public class Reasoner {
 
     /**
      * Returns all axioms contained in this reasoner
+     *
      * @return
      */
     public Set<OWLAxiom> getAxioms() {
