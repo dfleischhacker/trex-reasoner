@@ -33,9 +33,14 @@ public class OntologyNamingManager {
         Set<OWLClass> classesInSignature = ontology.getClassesInSignature();
         OWLClass[] classes = classesInSignature.toArray(new OWLClass[classesInSignature.size()]);
 
-        for (int i = 0; i < classes.length; i++) {
-            classToId.put(Util.getFragment(classes[i].getIRI().toString()), i);
-            idToClass.put(i, Util.getFragment(classes[i].getIRI().toString()));
+        int i = 0;
+        for (OWLClass c : classes) {
+            if (classToId.containsKey(c.getIRI().toString())) {
+                continue;
+            }
+            classToId.put(Util.getFragment(c.getIRI().toString()), i);
+            idToClass.put(i, Util.getFragment(c.getIRI().toString()));
+            i++;
         }
 
         log.debug("Number of concepts: {}", classToId.size());
@@ -44,9 +49,14 @@ public class OntologyNamingManager {
         OWLObjectProperty[] objectProperties = objectPropertiesInSignature
                 .toArray(new OWLObjectProperty[objectPropertiesInSignature.size()]);
 
-        for (int i = 0; i < objectProperties.length; i++) {
-            propertyToId.put(Util.getFragment(objectProperties[i].getIRI().toString()), i);
-            idToProperty.put(i, Util.getFragment(objectProperties[i].getIRI().toString()));
+        i = 0;
+        for (OWLObjectProperty objectProperty : objectProperties) {
+            if (propertyToId.containsKey(objectProperty.getIRI().toString())) {
+                continue;
+            }
+            propertyToId.put(Util.getFragment(objectProperty.getIRI().toString()), i);
+            idToProperty.put(i, Util.getFragment(objectProperty.getIRI().toString()));
+            i++;
         }
 
         log.debug("Number of properties: {}", propertyToId.size());
@@ -55,9 +65,14 @@ public class OntologyNamingManager {
         OWLNamedIndividual[] instances = instancesInSignature
                 .toArray(new OWLNamedIndividual[instancesInSignature.size()]);
 
-        for (int i = 0; i < instances.length; i++) {
-            instanceToId.put(Util.getFragment(instances[i].getIRI().toString()), i);
-            idToInstance.put(i, Util.getFragment(instances[i].getIRI().toString()));
+        i = 0;
+        for (OWLNamedIndividual instance : instances) {
+            if (instanceToId.containsKey(instance.getIRI().toString())) {
+                continue;
+            }
+            instanceToId.put(Util.getFragment(instance.getIRI().toString()), i);
+            idToInstance.put(i, Util.getFragment(instance.getIRI().toString()));
+            i++;
         }
 
         log.debug("Number of instances: {}", instanceToId.size());
