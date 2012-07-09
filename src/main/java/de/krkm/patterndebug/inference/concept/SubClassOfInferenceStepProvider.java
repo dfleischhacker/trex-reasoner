@@ -68,7 +68,7 @@ public class SubClassOfInferenceStepProvider extends InferenceStepProvider {
     @Override
     public boolean infer(Matrix matrix, int row, int col) {
         boolean mod = false;
-        log.debug("Inferencing for {} {}", row, col);
+//        log.debug("Inferencing for {} {}", row, col);
         for (int i = 0; i < matrix.getDimensionRow(); i++) {
             if (matrix.get(row, i) && matrix.get(i, col)) {
                 matrix.set(row, col, true);
@@ -134,5 +134,16 @@ public class SubClassOfInferenceStepProvider extends InferenceStepProvider {
         String subClassIRI = Util.getFragment(a.getSubClass().asOWLClass().getIRI().toString());
         String superClassIRI = Util.getFragment(a.getSuperClass().asOWLClass().getIRI().toString());
         return matrix.get(subClassIRI, superClassIRI);
+    }
+
+    @Override
+    public OrExpression getExplanation(OWLAxiom axiom) {
+        isProcessable(axiom);
+
+        OWLSubClassOfAxiom a = (OWLSubClassOfAxiom) axiom;
+
+        int subClassID = resolveRowIRI(Util.getFragment(a.getSubClass().asOWLClass().getIRI().toString()));
+        int superClassID = resolveColIRI(Util.getFragment(a.getSuperClass().asOWLClass().getIRI().toString()));
+        return matrix.getExplanation(subClassID, superClassID);
     }
 }

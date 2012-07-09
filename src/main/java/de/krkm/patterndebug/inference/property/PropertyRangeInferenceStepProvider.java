@@ -137,4 +137,15 @@ public class PropertyRangeInferenceStepProvider extends InferenceStepProvider {
         String rangeIRI = Util.getFragment(a.getRange().asOWLClass().getIRI().toString());
         return matrix.get(propertyIRI, rangeIRI);
     }
+
+    @Override
+    public OrExpression getExplanation(OWLAxiom axiom) {
+        isProcessable(axiom);
+
+        OWLObjectPropertyRangeAxiom a = (OWLObjectPropertyRangeAxiom) axiom;
+
+        int propertyID = resolveRowIRI(Util.getFragment(a.getProperty().asOWLObjectProperty().getIRI().toString()));
+        int domainID = resolveColIRI(Util.getFragment(a.getRange().asOWLClass().getIRI().toString()));
+        return matrix.getExplanation(propertyID, domainID);
+    }
 }

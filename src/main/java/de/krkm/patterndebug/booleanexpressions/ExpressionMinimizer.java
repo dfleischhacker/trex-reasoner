@@ -51,6 +51,33 @@ public class ExpressionMinimizer {
                 }
             }
         }
+
+    }
+
+    public static OrExpression minimize(OrExpression already, OrExpression add) {
+        OrExpression alreadyCopy = already.copy();
+        OrExpression addCopy = add.copy();
+
+        OrExpression toAdd = new OrExpression();
+
+        addLoop:
+        for (AndExpression andAdd : addCopy.getExpressions()) {
+            Iterator<AndExpression> andAlreadyIt = alreadyCopy.getExpressions().iterator();
+            alreadyLoop:
+            while (andAlreadyIt.hasNext()) {
+                AndExpression andAlready = andAlreadyIt.next();
+                if (andAdd.isAbsorbedBy(andAlready)) {
+                    // no need to add new expression since already absorbed by an existing one
+                    continue addLoop;
+                }
+                if (andAlready.isAbsorbedBy(andAdd)) {
+                    andAlreadyIt.remove();
+                    toAdd.addExpression(andAdd);
+                }
+            }
+        }
+        alreadyCopy.getExpressions().addAll(toAdd.getExpressions());
+        return alreadyCopy;
     }
 
     public static OrExpression or(AndExpression... expressions) {

@@ -1,5 +1,6 @@
 package de.krkm.patterndebug.inference;
 
+import de.krkm.patterndebug.booleanexpressions.OrExpression;
 import de.krkm.patterndebug.reasoner.Reasoner;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.OWLAxiom;
@@ -99,7 +100,8 @@ public abstract class InferenceStepProvider {
     }
 
     public String getIRIWithNamespace(String iri) {
-        return "http://www.semanticweb.org/daniel/ontologies/2012/5/untitled-ontology-6#" + iri;
+        //return "http://www.semanticweb.org/daniel/ontologies/2012/5/untitled-ontology-6#" + iri;
+        return iri;
     }
 
     /**
@@ -135,4 +137,6 @@ public abstract class InferenceStepProvider {
      * Returns true if the given axiom is entailed
      */
     public abstract boolean isEntailed(OWLAxiom axiom);
+
+    public abstract OrExpression getExplanation(OWLAxiom axiom);
 }

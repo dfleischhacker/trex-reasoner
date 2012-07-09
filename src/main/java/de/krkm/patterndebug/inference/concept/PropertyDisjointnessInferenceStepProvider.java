@@ -21,7 +21,7 @@ public class PropertyDisjointnessInferenceStepProvider extends InferenceStepProv
     @Override
     public void initMatrix(OWLOntology ontology, Reasoner reasoner, Matrix matrix) {
         this.matrix = matrix;
-        int dimension = matrix.getNamingManager().getNumberOfConcepts();
+        int dimension = matrix.getNamingManager().getNumberOfProperties();
         matrix.setMatrix(new boolean[dimension][dimension]);
         matrix.setExplanations(new OrExpression[dimension][dimension]);
 
@@ -39,8 +39,8 @@ public class PropertyDisjointnessInferenceStepProvider extends InferenceStepProv
                         continue;
                     }
                     if (!disjointProperties[i].isAnonymous() && !disjointProperties[j].isAnonymous()) {
-                        String iriI = Util.getFragment(disjointProperties[i].asOWLClass().getIRI().toString());
-                        String iriJ = Util.getFragment(disjointProperties[j].asOWLClass().getIRI().toString());
+                        String iriI = Util.getFragment(disjointProperties[i].asOWLObjectProperty().getIRI().toString());
+                        String iriJ = Util.getFragment(disjointProperties[j].asOWLObjectProperty().getIRI().toString());
                         matrix.set(iriI, iriJ, true);
                         int idI = matrix.getNamingManager().getPropertyId(iriI);
                         int idJ = matrix.getNamingManager().getPropertyId(iriJ);
@@ -56,11 +56,11 @@ public class PropertyDisjointnessInferenceStepProvider extends InferenceStepProv
     @Override
     public boolean infer(Matrix matrix, int row, int col) {
         boolean mod = false;
-        for (int i = 0; i < matrix.getDimensionRow(); i++) {
-            if (reasoner.isSubClassOf(row, i) && matrix.get(i, col)) {
+        for (int i = 0; i < reasoner.getPropertySubsumption().getDimensionRow(); i++) {
+            if (reasoner.isSubPropertyOf(row, i) && matrix.get(i, col)) {
                 matrix.set(row, col, true);
                 mod = matrix.addExplanation(row, col,
-                        ExpressionMinimizer.flatten(reasoner.getConceptSubsumption().getExplanation(row, i),
+                        ExpressionMinimizer.flatten(reasoner.getPropertySubsumption().getExplanation(row, i),
                                 matrix.getExplanation(i, col))) || mod;
             }
         }
@@ -127,8 +127,8 @@ public class PropertyDisjointnessInferenceStepProvider extends InferenceStepProv
                 if (i == j) {
                     continue;
                 }
-                String iriI = Util.getFragment(disjointClasses[i].asOWLClass().getIRI().toString());
-                String iriJ = Util.getFragment(disjointClasses[j].asOWLClass().getIRI().toString());
+                String iriI = Util.getFragment(disjointClasses[i].asOWLObjectProperty().getIRI().toString());
+                String iriJ = Util.getFragment(disjointClasses[j].asOWLObjectProperty().getIRI().toString());
                 res = matrix.get(iriI, iriJ) || res;
 
                 if (res) {
@@ -138,5 +138,38 @@ public class PropertyDisjointnessInferenceStepProvider extends InferenceStepProv
         }
 
         return res;
+    }
+
+    @Override
+    public OrExpression getExplanation(OWLAxiom axiom) {
+        isProcessable(axiom);
+
+        OrExpression overall = null;
+        Set<OWLObjectProperty> disjointPropertySet = axiom.getObjectPropertiesInSignature();
+        OWLObjectProperty[] disjointClasses = disjointPropertySet.toArray(
+                new OWLObjectProperty[disjointPropertySet.size()]);
+        for (int i = 0; i < disjointClasses.length; i++) {
+            for (int j = 0; j < i; j++) {
+                if (i == j) {
+                    continue;
+                }
+                int idI = resolveRowIRI(Util.getFragment(disjointClasses[i].asOWLObjectProperty().getIRI().toString()));
+                int idJ = resolveColIRI(Util.getFragment(disjointClasses[j].asOWLObjectProperty().getIRI().toString()));
+                if (matrix.get(idI, idJ)) {
+                    if (overall == null) {
+                        overall = matrix.getExplanation(idI, idJ);
+                    }
+                    else {
+                        System.out.println("Adding to overall: " + overall.toString());
+                        overall = ExpressionMinimizer.flatten(overall,
+                                matrix.getExplanation(idI, idJ));
+                        System.out.println("Adding to overall: " + overall.toString());
+                    }
+                }
+            }
+        }
+
+        ExpressionMinimizer.minimize(overall);
+        return overall;
     }
 }

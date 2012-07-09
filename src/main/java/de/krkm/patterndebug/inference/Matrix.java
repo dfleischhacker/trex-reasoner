@@ -97,8 +97,8 @@ public class Matrix {
         }
         OrExpression prev = explanations[row][col];
         explanations[row][col].getExpressions().addAll(expression.getExpressions());
-        ExpressionMinimizer.minimize(explanations[row][col]);
-        return !prev.equals(expression);
+        ExpressionMinimizer.minimize(explanations[row][col], expression);
+        return !prev.equals(explanations[row][col]);
     }
 
     /**
@@ -153,7 +153,7 @@ public class Matrix {
 
         int run = 0;
         while (modified) {
-            log.debug("Inference for {}, iteration {}", inferenceStep.getIdentifier(), run++);
+//            log.debug("Inference for {}, iteration {}", inferenceStep.getIdentifier(), run++);
             modified = false;
             for (int i = 0; i < getDimensionRow(); i++) {
                 for (int j = 0; j < getDimensionCol(); j++) {
@@ -292,5 +292,12 @@ public class Matrix {
      */
     public boolean isEntailed(OWLAxiom axiom) {
         return inferenceStep.isEntailed(axiom);
+    }
+
+    /**
+     * Returns the explanation for the entailment of the given axiom
+     */
+    public OrExpression getExplanation(OWLAxiom axiom) {
+        return inferenceStep.getExplanation(axiom);
     }
 }

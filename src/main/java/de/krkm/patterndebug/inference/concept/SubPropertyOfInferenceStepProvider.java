@@ -20,7 +20,7 @@ public class SubPropertyOfInferenceStepProvider extends InferenceStepProvider {
 
     @Override
     public void initMatrix(OWLOntology ontology, Reasoner reasoner, Matrix matrix) {
-        int dimension = matrix.getNamingManager().getNumberOfConcepts();
+        int dimension = matrix.getNamingManager().getNumberOfProperties();
         matrix.setMatrix(new boolean[dimension][dimension]);
         matrix.setExplanations(new OrExpression[dimension][dimension]);
 
@@ -130,5 +130,18 @@ public class SubPropertyOfInferenceStepProvider extends InferenceStepProvider {
         String subClassIRI = Util.getFragment(a.getSubProperty().asOWLObjectProperty().getIRI().toString());
         String superClassIRI = Util.getFragment(a.getSuperProperty().asOWLObjectProperty().getIRI().toString());
         return matrix.get(subClassIRI, superClassIRI);
+    }
+
+    @Override
+    public OrExpression getExplanation(OWLAxiom axiom) {
+        isProcessable(axiom);
+
+        OWLSubObjectPropertyOfAxiom a = (OWLSubObjectPropertyOfAxiom) axiom;
+
+        int subClassID = resolveRowIRI(Util.getFragment(a.getSubProperty().asOWLObjectProperty().getIRI().toString()));
+        int superClassID = resolveColIRI(
+                Util.getFragment(a.getSuperProperty().asOWLObjectProperty().getIRI().toString()));
+
+        return matrix.getExplanation(subClassID, superClassID);
     }
 }

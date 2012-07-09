@@ -38,6 +38,8 @@ public class AndExpression extends BooleanExpression {
     }
 
     public boolean isAbsorbedBy(AndExpression o) {
+//        System.out.println("isAbsorbedBy " + toString() + " .. " + o.toString());
+
         return expressions.containsAll(o.expressions);
     }
 

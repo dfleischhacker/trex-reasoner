@@ -51,7 +51,7 @@ public class OntologyNamingManager {
 
         i = 0;
         for (OWLObjectProperty objectProperty : objectProperties) {
-            if (propertyToId.containsKey(objectProperty.getIRI().toString())) {
+            if (propertyToId.containsKey(Util.getFragment(objectProperty.getIRI().toString()))) {
                 continue;
             }
             propertyToId.put(Util.getFragment(objectProperty.getIRI().toString()), i);
@@ -76,6 +76,8 @@ public class OntologyNamingManager {
         }
 
         log.debug("Number of instances: {}", instanceToId.size());
+
+        log.debug("Number of axioms: {}", ontology.getAxiomCount());
     }
 
     /**

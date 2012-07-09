@@ -1,5 +1,6 @@
 package de.krkm.patterndebug.reasoner;
 
+import de.krkm.patterndebug.booleanexpressions.OrExpression;
 import de.krkm.patterndebug.inference.Matrix;
 import de.krkm.patterndebug.inference.concept.ConceptDisjointnessInferenceStepProvider;
 import de.krkm.patterndebug.inference.concept.PropertyDisjointnessInferenceStepProvider;
@@ -114,12 +115,20 @@ public class Reasoner {
         return relevantMatrix.isEntailed(axiom);
     }
 
+    public OrExpression getExplanation(OWLAxiom axiom) {
+        Matrix relevantMatrix = typeToMatrix.get(axiom.getAxiomType());
+        if (relevantMatrix == null) {
+            throw new UnsupportedOperationException("Reasoner unable to handle axiom type: " + axiom.getAxiomType());
+        }
+
+        return relevantMatrix.getExplanation(axiom);
+    }
+
     /**
      * Starts materialization derivable concept-subsumption axioms
      */
     public void materializeConceptSubsumption() {
         conceptSubsumption.materialize();
-        System.out.println(conceptSubsumption.getAxioms());
     }
 
     /**
@@ -127,7 +136,6 @@ public class Reasoner {
      */
     public void materializeConceptDisjointness() {
         conceptDisjointness.materialize();
-        System.out.println(conceptDisjointness.getAxioms());
     }
 
     /**
@@ -148,18 +156,14 @@ public class Reasoner {
      * Starts materializing derivable property disjointness axioms
      */
     public void materializePropertyDomain() {
-        System.out.println("=======================\n" + propertyDomain.getAxioms());
         propertyDomain.materialize();
-        System.out.println("=======================\n" + propertyDomain.getAxioms());
     }
 
     /**
      * Starts materializing derivable property disjointness axioms
      */
     public void materializePropertyRange() {
-        System.out.println("=======================\n" + propertyRange.getAxioms());
         propertyRange.materialize();
-        System.out.println("=======================\n" + propertyRange.getAxioms());
     }
 
     /**
