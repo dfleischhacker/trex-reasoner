@@ -1,20 +1,26 @@
 package de.krkm.patterndebug.booleanexpressions;
 
-public class Literal extends BooleanExpression {
-    private String name;
+import org.semanticweb.owlapi.model.OWLAxiom;
 
-    public Literal(String name) {
-        this.name = name;
+public class Literal extends BooleanExpression {
+    private OWLAxiom axiom;
+
+    public Literal(OWLAxiom axiom) {
+        this.axiom = axiom;
     }
 
     @Override
     public String toString() {
-        return name;
+        return axiom.toString();
     }
 
     @Override
     public ExpressionType getType() {
         return ExpressionType.LITERAL;
+    }
+
+    public OWLAxiom getOWLAxiom() {
+        return axiom;
     }
 
 
@@ -29,7 +35,7 @@ public class Literal extends BooleanExpression {
 
         Literal literal = (Literal) o;
 
-        if (!name.equals(literal.name)) {
+        if (!axiom.equals(literal.axiom)) {
             return false;
         }
 
@@ -38,6 +44,6 @@ public class Literal extends BooleanExpression {
 
     @Override
     public int hashCode() {
-        return name.hashCode();
+        return axiom.hashCode();
     }
 }

@@ -37,7 +37,7 @@ public class PropertyRangeInferenceStepProvider extends InferenceStepProvider {
                 int subId = matrix.getNamingManager().getPropertyId(propertyIRI);
                 int superId = matrix.getNamingManager().getConceptId(rangeIRI);
                 matrix.addExplanation(subId, superId,
-                        or(and(literal(String.format("ObjectPropertyRange(%s, %s)", propertyIRI, rangeIRI)))));
+                        or(and(literal(a))));
             }
         }
     }

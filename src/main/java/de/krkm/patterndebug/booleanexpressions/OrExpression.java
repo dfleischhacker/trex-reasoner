@@ -1,5 +1,7 @@
 package de.krkm.patterndebug.booleanexpressions;
 
+import org.semanticweb.owlapi.model.OWLAxiom;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -67,6 +69,14 @@ public class OrExpression extends BooleanExpression {
     @Override
     public int hashCode() {
         return expressions.hashCode();
+    }
+
+    public HashSet<Set<OWLAxiom>> getDisjunction() {
+        HashSet<Set<OWLAxiom>> elements = new HashSet<Set<OWLAxiom>>();
+        for (AndExpression e : expressions) {
+            elements.add(e.getConjunction());
+        }
+        return elements;
     }
 
     public OrExpression copy() {

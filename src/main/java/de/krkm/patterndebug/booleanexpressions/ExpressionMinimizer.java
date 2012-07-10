@@ -1,5 +1,8 @@
 package de.krkm.patterndebug.booleanexpressions;
 
+import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLDataFactory;
+
 import java.util.Iterator;
 import java.util.Set;
 
@@ -7,12 +10,29 @@ import java.util.Set;
  * Provides methods to flatten and minimize boolean expressions.
  */
 public class ExpressionMinimizer {
+    private static OWLDataFactory df;
+
+    /**
+     * Sets the default data factory for this minimizer
+     *
+     * @param df default data factory
+     */
+    public static void setDataFactory(OWLDataFactory df) {
+        ExpressionMinimizer.df = df;
+    }
+
+
+    public static OWLDataFactory getDataFactory() {
+        return df;
+    }
+
     /**
      * Determines and returns the DNF for the given expression
      * @param e1 expression to flatten
      * @param e2 expression to flatten
      * @return flattened equivalent expression
      */
+
     public static OrExpression flatten(OrExpression e1, OrExpression e2) {
         OrExpression res = new OrExpression();
         for (AndExpression and1 : e1.getExpressions()) {
@@ -88,21 +108,21 @@ public class ExpressionMinimizer {
         return new AndExpression(literals);
     }
 
-    public static Literal literal(String name) {
-        return new Literal(name);
+    public static Literal literal(OWLAxiom ax) {
+        return new Literal(ax);
     }
 
     public static void main(String[] args) {
-        OrExpression o1 = or(and(literal("A"), literal("B"), literal("C")), and(literal("I"), literal("H"), literal("G")));
-        OrExpression o2 = or(and(literal("D"), literal("E")));
-
-        System.out.println(o1);
-        System.out.println(o2);
-        System.out.println(flatten(o1, o2));
-
-        OrExpression o3 = or(and(literal("A")), and(literal("A"),literal("D"),literal("E")), and(literal("A"), literal("B"), literal("C")) , and(literal("D"), literal("E")));
-        System.out.println(o3);
-        minimize(o3);
-        System.out.println(o3);
+//        OrExpression o1 = or(and(literal("A"), literal("B"), literal("C")), and(literal("I"), literal("H"), literal("G")));
+//        OrExpression o2 = or(and(literal("D"), literal("E")));
+//
+//        System.out.println(o1);
+//        System.out.println(o2);
+//        System.out.println(flatten(o1, o2));
+//
+//        OrExpression o3 = or(and(literal("A")), and(literal("A"),literal("D"),literal("E")), and(literal("A"), literal("B"), literal("C")) , and(literal("D"), literal("E")));
+//        System.out.println(o3);
+//        minimize(o3);
+//        System.out.println(o3);
     }
 }

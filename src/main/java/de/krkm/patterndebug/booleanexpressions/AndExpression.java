@@ -1,19 +1,21 @@
 package de.krkm.patterndebug.booleanexpressions;
 
+import org.semanticweb.owlapi.model.OWLAxiom;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 public class AndExpression extends BooleanExpression {
-    Set<BooleanExpression> expressions;
+    Set<Literal> expressions;
 
-    public AndExpression(BooleanExpression... expressions) {
-        this.expressions = new HashSet<BooleanExpression>();
+    public AndExpression(Literal... expressions) {
+        this.expressions = new HashSet<Literal>();
         Collections.addAll(this.expressions, expressions);
     }
 
-    public AndExpression(Set<BooleanExpression> expressions) {
-        this.expressions = new HashSet<BooleanExpression>(expressions);
+    public AndExpression(Set<Literal> expressions) {
+        this.expressions = new HashSet<Literal>(expressions);
     }
 
     @Override
@@ -37,13 +39,19 @@ public class AndExpression extends BooleanExpression {
         return ExpressionType.AND;
     }
 
-    public boolean isAbsorbedBy(AndExpression o) {
-//        System.out.println("isAbsorbedBy " + toString() + " .. " + o.toString());
+    public Set<OWLAxiom> getConjunction() {
+        Set<OWLAxiom> elements = new HashSet<OWLAxiom>();
+        for (Literal e : expressions) {
+            elements.add(e.getOWLAxiom());
+        }
+        return elements;
+    }
 
+    public boolean isAbsorbedBy(AndExpression o) {
         return expressions.containsAll(o.expressions);
     }
 
-    public Set<BooleanExpression> getExpressions() {
+    public Set<Literal> getExpressions() {
         return expressions;
     }
 
@@ -71,6 +79,6 @@ public class AndExpression extends BooleanExpression {
     }
 
     public AndExpression copy() {
-        return new AndExpression(new HashSet<BooleanExpression>(expressions));
+        return new AndExpression(new HashSet<Literal>(expressions));
     }
 }

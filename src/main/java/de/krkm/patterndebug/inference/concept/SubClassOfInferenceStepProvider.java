@@ -38,28 +38,29 @@ public class SubClassOfInferenceStepProvider extends InferenceStepProvider {
                 matrix.set(subClassIRI, superClassIRI, true);
                 int subId = matrix.getNamingManager().getConceptId(subClassIRI);
                 int superId = matrix.getNamingManager().getConceptId(superClassIRI);
-                matrix.addExplanation(subId, superId, or(and(literal(String.format("SubConceptOf(%s, %s)", subClassIRI,
-                        superClassIRI)))));
+                matrix.addExplanation(subId, superId, or(and(literal(a))));
             }
         }
 
         // stated class equivalence
         for (OWLEquivalentClassesAxiom a : ontology.getAxioms(AxiomType.EQUIVALENT_CLASSES)) {
-            Set<OWLClass> equivalentClassesSet = a.getNamedClasses();
-            OWLClass[] equivalentClasses = equivalentClassesSet.toArray(new OWLClass[equivalentClassesSet.size()]);
+            for (OWLEquivalentClassesAxiom p : a.asPairwiseAxioms()) {
+                Set<OWLClass> equivalentClassesSet = a.getNamedClasses();
+                OWLClass[] equivalentClasses = equivalentClassesSet.toArray(new OWLClass[equivalentClassesSet.size()]);
 
-            for (int i = 0; i < equivalentClasses.length; i++) {
-                for (int j = 0; j < equivalentClasses.length; j++) {
-                    if (i == j) {
-                        continue;
+                for (int i = 0; i < equivalentClasses.length; i++) {
+                    for (int j = 0; j < equivalentClasses.length; j++) {
+                        if (i == j) {
+                            continue;
+                        }
+                        String iriI = Util.getFragment(equivalentClasses[i].asOWLClass().getIRI().toString());
+                        int idI = matrix.getNamingManager().getConceptId(iriI);
+                        String iriJ = Util.getFragment(equivalentClasses[j].asOWLClass().getIRI().toString());
+                        int idJ = matrix.getNamingManager().getConceptId(iriJ);
+                        matrix.set(iriI, iriJ, true);
+                        matrix.addExplanation(idI, idJ,
+                                or(and(literal(p))));
                     }
-                    String iriI = Util.getFragment(equivalentClasses[i].asOWLClass().getIRI().toString());
-                    int idI = matrix.getNamingManager().getConceptId(iriI);
-                    String iriJ = Util.getFragment(equivalentClasses[j].asOWLClass().getIRI().toString());
-                    int idJ = matrix.getNamingManager().getConceptId(iriJ);
-                    matrix.set(iriI, iriJ, true);
-                    matrix.addExplanation(idI, idJ,
-                            or(and(literal(String.format("SubConceptOf(%s, %s)", iriI, iriJ)))));
                 }
             }
         }

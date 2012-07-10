@@ -29,25 +29,28 @@ public class ConceptDisjointnessInferenceStepProvider extends InferenceStepProvi
 
         Set<OWLDisjointClassesAxiom> disjointClassesAxiomSet = ontology.getAxioms(AxiomType.DISJOINT_CLASSES);
         for (OWLDisjointClassesAxiom a : disjointClassesAxiomSet) {
-            Set<OWLClass> disjointClassesSet = a.getClassesInSignature();
-            OWLClass[] disjointClasses = disjointClassesSet.toArray(new OWLClass[disjointClassesSet.size()]);
-            for (int i = 0; i < disjointClasses.length; i++) {
-                for (int j = 0; j < i; j++) {
-                    if (i == j) {
-                        continue;
-                    }
-                    if (!disjointClasses[i].isAnonymous() && !disjointClasses[j].isAnonymous()) {
-                        String iriI = Util.getFragment(disjointClasses[i].asOWLClass().getIRI().toString());
-                        String iriJ = Util.getFragment(disjointClasses[j].asOWLClass().getIRI().toString());
-                        matrix.set(iriI, iriJ, true);
-                        int idI = matrix.getNamingManager().getConceptId(iriI);
-                        int idJ = matrix.getNamingManager().getConceptId(iriJ);
-                        matrix.set(iriI, iriJ, true);
-                        matrix.addExplanation(idI, idJ,
-                                or(and(literal(String.format("DisjointWith(%s, %s)", iriI, iriJ)))));
+            for (OWLDisjointClassesAxiom p : a.asPairwiseAxioms()) {
+                Set<OWLClass> disjointClassesSet = a.getClassesInSignature();
+                OWLClass[] disjointClasses = disjointClassesSet.toArray(new OWLClass[disjointClassesSet.size()]);
+                for (int i = 0; i < disjointClasses.length; i++) {
+                    for (int j = 0; j < i; j++) {
+                        if (i == j) {
+                            continue;
+                        }
+                        if (!disjointClasses[i].isAnonymous() && !disjointClasses[j].isAnonymous()) {
+                            String iriI = Util.getFragment(disjointClasses[i].asOWLClass().getIRI().toString());
+                            String iriJ = Util.getFragment(disjointClasses[j].asOWLClass().getIRI().toString());
+                            matrix.set(iriI, iriJ, true);
+                            int idI = matrix.getNamingManager().getConceptId(iriI);
+                            int idJ = matrix.getNamingManager().getConceptId(iriJ);
+                            matrix.set(iriI, iriJ, true);
+                            matrix.addExplanation(idI, idJ, or(and(literal(p))));
+                        }
                     }
                 }
             }
+
+
         }
     }
 

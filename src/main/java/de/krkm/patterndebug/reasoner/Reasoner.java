@@ -1,5 +1,6 @@
 package de.krkm.patterndebug.reasoner;
 
+import de.krkm.patterndebug.booleanexpressions.ExpressionMinimizer;
 import de.krkm.patterndebug.booleanexpressions.OrExpression;
 import de.krkm.patterndebug.inference.Matrix;
 import de.krkm.patterndebug.inference.concept.ConceptDisjointnessInferenceStepProvider;
@@ -48,6 +49,7 @@ public class Reasoner {
     public Reasoner(OWLOntology ontology) {
         this.ontology = ontology;
         namingManager = new OntologyNamingManager(ontology);
+        ExpressionMinimizer.setDataFactory(ontology.getOWLOntologyManager().getOWLDataFactory());
         conceptSubsumption = new Matrix(ontology, this, namingManager, new SubClassOfInferenceStepProvider());
         registerType(conceptSubsumption);
         materializeConceptSubsumption();
