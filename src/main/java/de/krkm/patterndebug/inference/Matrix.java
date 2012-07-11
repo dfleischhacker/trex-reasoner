@@ -95,7 +95,7 @@ public class Matrix {
         if (explanations[row][col] == null) {
             explanations[row][col] = new OrExpression();
         }
-        OrExpression prev = explanations[row][col];
+        OrExpression prev = explanations[row][col].copy();
         explanations[row][col].getExpressions().addAll(expression.getExpressions());
         ExpressionMinimizer.minimize(explanations[row][col], expression);
         return !prev.equals(explanations[row][col]);
@@ -157,7 +157,7 @@ public class Matrix {
             modified = false;
             for (int i = 0; i < getDimensionRow(); i++) {
                 for (int j = 0; j < getDimensionCol(); j++) {
-                    modified = inferenceStep.infer(this, i, j);
+                    modified = inferenceStep.infer(this, i, j) || modified;
                 }
             }
         }
