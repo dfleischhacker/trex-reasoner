@@ -8,9 +8,7 @@ import de.krkm.patterndebug.inference.concept.SubClassOfInferenceStepProvider;
 import de.krkm.patterndebug.inference.concept.SubPropertyOfInferenceStepProvider;
 import de.krkm.patterndebug.inference.property.PropertyDomainInferenceStepProvider;
 import de.krkm.patterndebug.inference.property.PropertyRangeInferenceStepProvider;
-import org.semanticweb.owlapi.model.AxiomType;
-import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +36,7 @@ public class Reasoner {
     private Matrix propertyRange;
 
     private HashMap<AxiomType, Matrix> typeToMatrix = new HashMap<AxiomType, Matrix>();
-
+    private OWLDataFactory dataFactory;
 
     /**
      * Initializes the reasoner to perform inference on the given ontology.
@@ -47,6 +45,7 @@ public class Reasoner {
      */
     public Reasoner(OWLOntology ontology) {
         this.ontology = ontology;
+        dataFactory = ontology.getOWLOntologyManager().getOWLDataFactory();
         namingManager = new OntologyNamingManager(ontology);
         conceptSubsumption = new Matrix(ontology, this, namingManager, new SubClassOfInferenceStepProvider());
         registerType(conceptSubsumption);
@@ -230,14 +229,51 @@ public class Reasoner {
         return propertyDisjointness.get(property1, property2);
     }
 
+    /**
+     * Returns the naming manager used by this reasoner
+     *
+     * @return naming manager of this reasoner
+     */
     public OntologyNamingManager getNamingManager() {
         return namingManager;
     }
 
     /**
-     * Returns all axioms contained in this reasoner
+     * Returns the set of all classes which are unsatisfiable in the ontology.
      *
-     * @return
+     * @return set of all unsatisfiable classes
+     */
+    public Set<OWLClass> getIncoherentClasses() {
+        Set<OWLClass> res = new HashSet<OWLClass>();
+        for (int i = 0; i < conceptDisjointness.getDimensionCol(); i++) {
+            if (conceptDisjointness.get(i, i)) {
+                res.add(dataFactory.getOWLClass(IRI.create(namingManager.getConceptIRI(i))));
+            }
+        }
+
+        return res;
+    }
+
+    /**
+     * Returns the set of all unsatisfiable properties, i.e., properties whose extension must be empty.
+     *
+     * @return set of all unsatisfiable properties
+     */
+    public Set<OWLObjectProperty> getIncoherentProperties() {
+        Set<OWLObjectProperty> res = new HashSet<OWLObjectProperty>();
+        for (int i = 0; i < propertyDisjointness.getDimensionCol(); i++) {
+            if (propertyDisjointness.get(i, i)) {
+                res.add(dataFactory.getOWLObjectProperty(IRI.create(namingManager.getPropertyIRI(i))));
+            }
+        }
+
+        return res;
+    }
+
+    /**
+     * Returns all axioms supported by this reasoner and entailed by the ontology.
+     *
+     * @return all axioms supported by this reasoner and entailed by the ontology
      */
     public Set<OWLAxiom> getAxioms() {
         HashSet<OWLAxiom> res = new HashSet<OWLAxiom>();

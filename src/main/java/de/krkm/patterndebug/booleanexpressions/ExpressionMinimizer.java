@@ -1,7 +1,6 @@
 package de.krkm.patterndebug.booleanexpressions;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLDataFactory;
 
 import java.util.Iterator;
 import java.util.Set;
@@ -10,22 +9,6 @@ import java.util.Set;
  * Provides methods to flatten and minimize boolean expressions.
  */
 public class ExpressionMinimizer {
-    private static OWLDataFactory df;
-
-    /**
-     * Sets the default data factory for this minimizer
-     *
-     * @param df default data factory
-     */
-    public static void setDataFactory(OWLDataFactory df) {
-        ExpressionMinimizer.df = df;
-    }
-
-
-    public static OWLDataFactory getDataFactory() {
-        return df;
-    }
-
     /**
      * Determines and returns the DNF for the given expression
      * @param e1 expression to flatten
@@ -83,7 +66,6 @@ public class ExpressionMinimizer {
         addLoop:
         for (AndExpression andAdd : addCopy.getExpressions()) {
             Iterator<AndExpression> andAlreadyIt = alreadyCopy.getExpressions().iterator();
-            alreadyLoop:
             while (andAlreadyIt.hasNext()) {
                 AndExpression andAlready = andAlreadyIt.next();
                 if (andAdd.isAbsorbedBy(andAlready)) {
@@ -100,6 +82,12 @@ public class ExpressionMinimizer {
         return alreadyCopy;
     }
 
+    /**
+     * Creates and returns an OR-expression.
+     *
+     * @param expressions
+     * @return
+     */
     public static OrExpression or(AndExpression... expressions) {
         return new OrExpression(expressions);
     }
