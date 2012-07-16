@@ -44,18 +44,14 @@ public class PropertyRangeInferenceStepProvider extends InferenceStepProvider {
 
     @Override
     public boolean infer(Matrix matrix, int row, int col) {
-        if (matrix.get(row, col)) {
-            return true;
-        }
-
         boolean mod = false;
         // propagate concept subsumption to property domain
         for (int i = 0; i < matrix.getDimensionCol(); i++) {
-            if (matrix.get(row, i) && reasoner.getConceptSubsumption().get(i, col)) {
+            if (matrix.get(row, i) && reasoner.getConceptSubsumption().get(col, i)) {
                 matrix.set(row, col, true);
                 mod = matrix.addExplanation(row, col,
                         ExpressionMinimizer.flatten(matrix.getExplanation(row, i),
-                                reasoner.getConceptSubsumption().getExplanation(i, col))) || mod;
+                                reasoner.getConceptSubsumption().getExplanation(col, i))) || mod;
             }
         }
 
