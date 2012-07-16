@@ -1,9 +1,9 @@
-package de.krkm.patterndebug.inference;
+package de.krkm.trex.inference;
 
-import de.krkm.patterndebug.booleanexpressions.ExpressionMinimizer;
-import de.krkm.patterndebug.booleanexpressions.OrExpression;
-import de.krkm.patterndebug.reasoner.OntologyNamingManager;
-import de.krkm.patterndebug.reasoner.Reasoner;
+import de.krkm.trex.booleanexpressions.ExpressionMinimizer;
+import de.krkm.trex.booleanexpressions.OrExpression;
+import de.krkm.trex.reasoner.OntologyNamingManager;
+import de.krkm.trex.reasoner.Reasoner;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;

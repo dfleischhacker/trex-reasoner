@@ -1,4 +1,4 @@
-package de.krkm.patterndebug.booleanexpressions;
+package de.krkm.trex.booleanexpressions;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
 

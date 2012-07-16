@@ -1,4 +1,4 @@
-package de.krkm.patterndebug.ui.cmdline;
+package de.krkm.trex.ui.cmdline;
 
 import org.kohsuke.args4j.Option;
 

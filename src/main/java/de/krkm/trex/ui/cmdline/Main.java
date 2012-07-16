@@ -1,8 +1,8 @@
-package de.krkm.patterndebug.ui.cmdline;
+package de.krkm.trex.ui.cmdline;
 
 
-import de.krkm.patterndebug.reasoner.Reasoner;
-import de.krkm.patterndebug.util.OntologyReader;
+import de.krkm.trex.reasoner.Reasoner;
+import de.krkm.trex.util.OntologyReader;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.semanticweb.owlapi.model.OWLOntology;

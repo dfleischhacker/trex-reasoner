@@ -1,4 +1,4 @@
-package de.krkm.patterndebug.util;
+package de.krkm.trex.util;
 
 public class Util {
     private final static boolean NO_SHORTENING = true;

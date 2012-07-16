@@ -1,14 +1,14 @@
-package de.krkm.patterndebug.inference.property;
+package de.krkm.trex.inference.property;
 
-import de.krkm.patterndebug.booleanexpressions.ExpressionMinimizer;
-import de.krkm.patterndebug.booleanexpressions.OrExpression;
-import de.krkm.patterndebug.inference.InferenceStepProvider;
-import de.krkm.patterndebug.inference.Matrix;
-import de.krkm.patterndebug.reasoner.Reasoner;
-import de.krkm.patterndebug.util.Util;
+import de.krkm.trex.booleanexpressions.ExpressionMinimizer;
+import de.krkm.trex.booleanexpressions.OrExpression;
+import de.krkm.trex.inference.InferenceStepProvider;
+import de.krkm.trex.inference.Matrix;
+import de.krkm.trex.reasoner.Reasoner;
+import de.krkm.trex.util.Util;
 import org.semanticweb.owlapi.model.*;
 
-import static de.krkm.patterndebug.booleanexpressions.ExpressionMinimizer.*;
+import static de.krkm.trex.booleanexpressions.ExpressionMinimizer.*;
 
 /**
  * Provides the inference step routines for property domains

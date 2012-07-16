@@ -1,4 +1,4 @@
-package de.krkm.patterndebug.booleanexpressions;
+package de.krkm.trex.booleanexpressions;
 
 /**
  * Base interface for boolean expressions

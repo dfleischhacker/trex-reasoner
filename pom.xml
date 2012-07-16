@@ -2,13 +2,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>de.krkm.patterndebug</groupId>
-    <artifactId>patterndebug</artifactId>
+    <groupId>de.krkm.trex</groupId>
+    <artifactId>trex</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>Eternal Peacemaker</name>
-    <url>https://github.com/dfleischhacker/eternal-peacemaker</url>
+    <name>TRex - Terminology Reasoning with Explanations</name>
+    <url>https://github.com/dfleischhacker/trex</url>
 
     <build>
         <plugins>
@@ -63,7 +63,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>de.krkm.patterndebug.ui.cmdline.Main</mainClass>
+                            <mainClass>de.krkm.trex.ui.cmdline.Main</mainClass>
                             <classpathPrefix>lib/</classpathPrefix>
                         </manifest>
                     </archive>

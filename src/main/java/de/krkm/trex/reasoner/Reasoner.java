@@ -1,13 +1,13 @@
-package de.krkm.patterndebug.reasoner;
+package de.krkm.trex.reasoner;
 
-import de.krkm.patterndebug.booleanexpressions.OrExpression;
-import de.krkm.patterndebug.inference.Matrix;
-import de.krkm.patterndebug.inference.concept.ConceptDisjointnessInferenceStepProvider;
-import de.krkm.patterndebug.inference.concept.PropertyDisjointnessInferenceStepProvider;
-import de.krkm.patterndebug.inference.concept.SubClassOfInferenceStepProvider;
-import de.krkm.patterndebug.inference.concept.SubPropertyOfInferenceStepProvider;
-import de.krkm.patterndebug.inference.property.PropertyDomainInferenceStepProvider;
-import de.krkm.patterndebug.inference.property.PropertyRangeInferenceStepProvider;
+import de.krkm.trex.booleanexpressions.OrExpression;
+import de.krkm.trex.inference.Matrix;
+import de.krkm.trex.inference.concept.ConceptDisjointnessInferenceStepProvider;
+import de.krkm.trex.inference.concept.PropertyDisjointnessInferenceStepProvider;
+import de.krkm.trex.inference.concept.SubClassOfInferenceStepProvider;
+import de.krkm.trex.inference.concept.SubPropertyOfInferenceStepProvider;
+import de.krkm.trex.inference.property.PropertyDomainInferenceStepProvider;
+import de.krkm.trex.inference.property.PropertyRangeInferenceStepProvider;
 import org.semanticweb.owlapi.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

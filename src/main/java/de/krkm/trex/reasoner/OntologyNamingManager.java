@@ -1,6 +1,6 @@
-package de.krkm.patterndebug.reasoner;
+package de.krkm.trex.reasoner;
 
-import de.krkm.patterndebug.util.Util;
+import de.krkm.trex.util.Util;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObjectProperty;

@@ -1,4 +1,4 @@
-package de.krkm.patterndebug.util;
+package de.krkm.trex.util;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
