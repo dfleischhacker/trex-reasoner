@@ -1,4 +1,4 @@
-eternal-peacemaker
+TRex - Terminology Reasoning with Explanations
 ==================
 
-Scalable coherence assurance for OWL 2 ontologies
+A basic reasoner for the t-box of OWL2 ontologies providing explanations for axioms
