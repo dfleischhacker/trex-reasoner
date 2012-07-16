@@ -153,7 +153,7 @@ public class Matrix {
 
         int run = 0;
         while (modified) {
-//            log.debug("Inference for {}, iteration {}", inferenceStep.getIdentifier(), run++);
+            log.debug("Inference for {}, iteration {}", inferenceStep.getIdentifier(), run++);
             modified = false;
             for (int i = 0; i < getDimensionRow(); i++) {
                 for (int j = 0; j < getDimensionCol(); j++) {
