@@ -38,7 +38,7 @@ public class PropertyDomainInferenceStepProvider extends InferenceStepProvider {
                 int propertyId = matrix.getNamingManager().getPropertyId(propertyIRI);
                 int domainId = matrix.getNamingManager().getConceptId(domainIRI);
                 matrix.addExplanation(propertyId, domainId,
-                        or(and(literal(a))));
+                        or(and(literal(a.getAxiomWithoutAnnotations()))));
             }
         }
     }

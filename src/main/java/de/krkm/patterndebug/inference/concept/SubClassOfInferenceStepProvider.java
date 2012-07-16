@@ -38,7 +38,7 @@ public class SubClassOfInferenceStepProvider extends InferenceStepProvider {
                 matrix.set(subClassIRI, superClassIRI, true);
                 int subId = matrix.getNamingManager().getConceptId(subClassIRI);
                 int superId = matrix.getNamingManager().getConceptId(superClassIRI);
-                matrix.addExplanation(subId, superId, or(and(literal(a))));
+                matrix.addExplanation(subId, superId, or(and(literal(a.getAxiomWithoutAnnotations()))));
             }
         }
 

@@ -38,7 +38,7 @@ public class SubPropertyOfInferenceStepProvider extends InferenceStepProvider {
                 int subId = matrix.getNamingManager().getPropertyId(subPropertyIRI);
                 int superId = matrix.getNamingManager().getPropertyId(superPropertyIRI);
                 matrix.addExplanation(subId, superId,
-                        or(and(literal(a))));
+                        or(and(literal(a.getAxiomWithoutAnnotations()))));
             }
         }
 

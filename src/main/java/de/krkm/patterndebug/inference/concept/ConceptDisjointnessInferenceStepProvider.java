@@ -44,7 +44,7 @@ public class ConceptDisjointnessInferenceStepProvider extends InferenceStepProvi
                             int idI = matrix.getNamingManager().getConceptId(iriI);
                             int idJ = matrix.getNamingManager().getConceptId(iriJ);
                             matrix.set(iriI, iriJ, true);
-                            matrix.addExplanation(idI, idJ, or(and(literal(p))));
+                            matrix.addExplanation(idI, idJ, or(and(literal(p.getAxiomWithoutAnnotations()))));
                         }
                     }
                 }

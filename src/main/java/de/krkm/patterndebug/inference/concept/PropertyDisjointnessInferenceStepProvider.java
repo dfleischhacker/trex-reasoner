@@ -46,7 +46,7 @@ public class PropertyDisjointnessInferenceStepProvider extends InferenceStepProv
                         int idJ = matrix.getNamingManager().getPropertyId(iriJ);
                         matrix.set(iriI, iriJ, true);
                         matrix.addExplanation(idI, idJ,
-                                or(and(literal(a))));
+                                or(and(literal(a.getAxiomWithoutAnnotations()))));
                     }
                 }
             }
