@@ -135,8 +135,17 @@ public abstract class InferenceStepProvider {
 
     /**
      * Returns true if the given axiom is entailed
+     *
+     * @param axiom the axiom to check its entailment
+     * @return true if the given axiom is entailed by the ontology
      */
     public abstract boolean isEntailed(OWLAxiom axiom);
 
+    /**
+     * Returns the explanation for the entailment of the given axiom.
+     *
+     * @param axiom axiom to return explanation for
+     * @return explanation for given axiom
+     */
     public abstract OrExpression getExplanation(OWLAxiom axiom);
 }
