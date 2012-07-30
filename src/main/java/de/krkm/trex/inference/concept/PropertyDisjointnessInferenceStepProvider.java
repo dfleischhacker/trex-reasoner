@@ -172,4 +172,26 @@ public class PropertyDisjointnessInferenceStepProvider extends InferenceStepProv
         ExpressionMinimizer.minimize(overall);
         return overall;
     }
+
+    @Override
+    public void addAxiom(OWLAxiom axiom) {
+        isProcessable(axiom);
+
+        Set<OWLObjectProperty> disjointPropertySet = axiom.getObjectPropertiesInSignature();
+        OWLObjectProperty[] disjointClasses = disjointPropertySet.toArray(
+                new OWLObjectProperty[disjointPropertySet.size()]);
+        for (int i = 0; i < disjointClasses.length; i++) {
+            for (int j = 0; j < i; j++) {
+                if (i == j) {
+                    continue;
+                }
+                String iriI = Util.getFragment(disjointClasses[i].asOWLObjectProperty().getIRI().toString());
+                String iriJ = Util.getFragment(disjointClasses[j].asOWLObjectProperty().getIRI().toString());
+                matrix.set(iriI, iriJ, true);
+                int indexA = resolveRowIRI(iriI);
+                int indexB = resolveColIRI(iriJ);
+                matrix.addExplanation(indexA, indexB, or(and(literal(axiom))));
+            }
+        }
+    }
 }

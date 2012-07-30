@@ -135,7 +135,6 @@ public class Matrix {
             indexA = temp;
         }
 
-
         if (matrix[indexA][indexB] == val) {
             return false;
         }
@@ -163,6 +162,16 @@ public class Matrix {
         }
 
         log.debug("Done materializing matrix {}", inferenceStep.getIdentifier());
+    }
+
+    /**
+     * Adds the given axiom to this matrix. The axiom must not introduce new concepts or properties but may only add
+     * knowledge about already existing ones.
+     *
+     * @param axiom axiom to add
+     */
+    public void addAxiom(OWLAxiom axiom) {
+        inferenceStep.addAxiom(axiom);
     }
 
     /**

@@ -142,4 +142,18 @@ public class SubPropertyOfInferenceStepProvider extends InferenceStepProvider {
 
         return matrix.getExplanation(subClassID, superClassID);
     }
+
+    @Override
+    public void addAxiom(OWLAxiom axiom) {
+        isProcessable(axiom);
+
+        OWLSubObjectPropertyOfAxiom a = (OWLSubObjectPropertyOfAxiom) axiom;
+
+        String subClassIRI = Util.getFragment(a.getSubProperty().asOWLObjectProperty().getIRI().toString());
+        String superClassIRI = Util.getFragment(a.getSuperProperty().asOWLObjectProperty().getIRI().toString());
+        matrix.set(subClassIRI, superClassIRI, true);
+        int indexA = resolveRowIRI(subClassIRI);
+        int indexB = resolveColIRI(superClassIRI);
+        matrix.addExplanation(indexA, indexB, or(and(literal(axiom))));
+    }
 }

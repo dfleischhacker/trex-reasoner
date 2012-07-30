@@ -73,8 +73,18 @@ public class Reasoner {
                 new PropertyRangeInferenceStepProvider());
         registerType(propertyRange);
         materializePropertyRange();
+    }
 
-
+    /**
+     * Re-runs the materialization step for this reasoner. In this process only new axioms are considered which do not
+     * introduce new properties or concepts.
+     *
+     * @return
+     */
+    public void rematerialize() {
+        for (Matrix m : typeToMatrix.values()) {
+            m.materialize();
+        }
     }
 
     public Matrix getConceptSubsumption() {
@@ -99,6 +109,18 @@ public class Reasoner {
 
     public Matrix getPropertyRange() {
         return propertyRange;
+    }
+
+    /**
+     * Adds the given axiom into the ontology which is managed by this reasoner instance. Afterwards, a
+     * rematerialization using {@link #rematerialize()} might be required.
+     *
+     * @param axiom axiom to add into ontology
+     */
+    public void addAxiom(OWLAxiom axiom) {
+        Matrix relevantMatrix = typeToMatrix.get(axiom.getAxiomType());
+        relevantMatrix.addAxiom(axiom);
+        ontology.getOWLOntologyManager().addAxiom(ontology, axiom);
     }
 
     public void registerType(Matrix matrix) {

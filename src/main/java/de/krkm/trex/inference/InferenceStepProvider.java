@@ -148,4 +148,12 @@ public abstract class InferenceStepProvider {
      * @return explanation for given axiom
      */
     public abstract OrExpression getExplanation(OWLAxiom axiom);
+
+    /**
+     * Adds the given axiom into the matrix for this provider. Such axioms must only contain properties and/or concepts
+     * which have been known previously.
+     *
+     * @param axiom axiom to add
+     */
+    public abstract void addAxiom(OWLAxiom axiom);
 }
