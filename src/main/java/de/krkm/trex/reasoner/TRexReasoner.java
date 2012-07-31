@@ -78,8 +78,6 @@ public class TRexReasoner {
     /**
      * Re-runs the materialization step for this reasoner. In this process only new axioms are considered which do not
      * introduce new properties or concepts.
-     *
-     * @return
      */
     public void rematerialize() {
         for (Matrix m : typeToMatrix.values()) {
@@ -87,6 +85,11 @@ public class TRexReasoner {
         }
     }
 
+    /**
+     * Registers the given matrix to the reasoner system.
+     *
+     * @param matrix matrix to register in reasoner
+     */
     public void registerType(Matrix matrix) {
         typeToMatrix.put(matrix.getAxiomType(), matrix);
     }
@@ -100,67 +103,97 @@ public class TRexReasoner {
         return namingManager;
     }
 
+    /**
+     * Returns the matrix used for concept subsumption
+     *
+     * @return matrix used for concept subsumption
+     */
     public Matrix getConceptSubsumption() {
         return conceptSubsumption;
     }
 
+    /**
+     * Returns the matrix used for concept disjointness
+     *
+     * @return matrix used for concept disjointness
+     */
     public Matrix getConceptDisjointness() {
         return conceptDisjointness;
     }
 
+    /**
+     * Returns the matrix used for property subsumption
+     *
+     * @return matrix used for property subsumption
+     */
     public Matrix getPropertySubsumption() {
         return propertySubsumption;
     }
 
+    /**
+     * Returns the matrix used for property disjointness
+     *
+     * @return matrix used for property disjointness
+     */
     public Matrix getPropertyDisjointness() {
         return propertyDisjointness;
     }
 
+    /**
+     * Returns the matrix used for property domains
+     *
+     * @return matrix used for property domains
+     */
     public Matrix getPropertyDomain() {
         return propertyDomain;
     }
 
+    /**
+     * Returns the matrix used for property ranges
+     *
+     * @return matrix used for property ranges
+     */
     public Matrix getPropertyRange() {
         return propertyRange;
     }
 
     /**
-     * Starts materialization derivable concept-subsumption axioms
+     * Starts materialization of derivable concept-subsumption axioms
      */
     public void materializeConceptSubsumption() {
         conceptSubsumption.materialize();
     }
 
     /**
-     * Starts materializing derivable concept disjointness axioms
+     * Starts materializing of derivable concept disjointness axioms
      */
     public void materializeConceptDisjointness() {
         conceptDisjointness.materialize();
     }
 
     /**
-     * Starts materialization derivable property-subsumption axioms
+     * Starts materialization of derivable property-subsumption axioms
      */
     public void materializePropertySubsumption() {
         propertySubsumption.materialize();
     }
 
     /**
-     * Starts materializing derivable property disjointness axioms
+     * Starts materializing of derivable property disjointness axioms
      */
     public void materializePropertyDisjointness() {
         propertyDisjointness.materialize();
     }
 
     /**
-     * Starts materializing derivable property disjointness axioms
+     * Starts materializing of derivable property disjointness axioms
      */
     public void materializePropertyDomain() {
         propertyDomain.materialize();
     }
 
     /**
-     * Starts materializing derivable property disjointness axioms
+     * Starts materializing of derivable property disjointness axioms
      */
     public void materializePropertyRange() {
         propertyRange.materialize();
@@ -195,6 +228,12 @@ public class TRexReasoner {
         ontology.getOWLOntologyManager().addAxiom(ontology, axiom);
     }
 
+    /**
+     * Determines whether the given axiom is entailed by the ontology.
+     *
+     * @param axiom axiom to check entailment for
+     * @return true if the axiom is entailed by the ontology, false otherwise
+     */
     public boolean isEntailed(OWLAxiom axiom) {
         Matrix relevantMatrix = typeToMatrix.get(axiom.getAxiomType());
         if (relevantMatrix == null) {
@@ -204,6 +243,12 @@ public class TRexReasoner {
         return relevantMatrix.isEntailed(axiom);
     }
 
+    /**
+     * Returns the explanation for the given axiom or null if the axiom is not entailed.
+     *
+     * @param axiom axiom to return explanation for
+     * @return explanation for given axiom if axiom is entailed, otherwise null
+     */
     public OrExpression getExplanation(OWLAxiom axiom) {
         Matrix relevantMatrix = typeToMatrix.get(axiom.getAxiomType());
         if (relevantMatrix == null) {
@@ -261,18 +306,46 @@ public class TRexReasoner {
         return propertySubsumption.get(subProperty, superProperty);
     }
 
+    /**
+     * Determines whether both classes are disjoint.
+     *
+     * @param class1 first class
+     * @param class2 second class
+     * @return true if both classes are disjoint, otherwise false
+     */
     public boolean areDisjointClasses(String class1, String class2) {
         return conceptDisjointness.get(class1, class2);
     }
 
+    /**
+     * Determines whether both classes are disjoint.
+     *
+     * @param class1 first class
+     * @param class2 second class
+     * @return true if both classes are disjoint, otherwise false
+     */
     public boolean areDisjointClasses(int class1, int class2) {
         return conceptDisjointness.get(class1, class2);
     }
 
+    /**
+     * Determines whether both properties are disjoint.
+     *
+     * @param property1 first property
+     * @param property2 second property
+     * @return true if both classes are disjoint, otherwise false
+     */
     public boolean areDisjointProperties(String property1, String property2) {
         return propertyDisjointness.get(property1, property2);
     }
 
+    /**
+     * Determines whether both properties are disjoint.
+     *
+     * @param property1 first property
+     * @param property2 second property
+     * @return true if both classes are disjoint, otherwise false
+     */
     public boolean areDisjointProperties(int property1, int property2) {
         return propertyDisjointness.get(property1, property2);
     }
