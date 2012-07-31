@@ -1,7 +1,7 @@
 package de.krkm.trex.ui.cmdline;
 
 
-import de.krkm.trex.reasoner.Reasoner;
+import de.krkm.trex.reasoner.TRexReasoner;
 import de.krkm.trex.util.OntologyReader;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -31,7 +31,7 @@ public class Main {
         OWLOntology ontology = OntologyReader.loadOntology(options.getInputOntology());
         log.debug("Done loading ontology");
         log.debug("Initialize reasoner");
-        Reasoner r = new Reasoner(ontology);
+        TRexReasoner r = new TRexReasoner(ontology);
         log.debug("Done initializing reasoner");
 
         // search for concepts disjoint to themselves

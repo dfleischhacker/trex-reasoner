@@ -1,7 +1,7 @@
 package de.krkm.trex.inference;
 
 import de.krkm.trex.booleanexpressions.OrExpression;
-import de.krkm.trex.reasoner.Reasoner;
+import de.krkm.trex.reasoner.TRexReasoner;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLEntity;
@@ -23,7 +23,7 @@ public abstract class InferenceStepProvider {
      * @param reasoner reasoner to use
      * @param matrix   matrix to initialize using the given ontology
      */
-    public abstract void initMatrix(OWLOntology ontology, Reasoner reasoner, Matrix matrix);
+    public abstract void initMatrix(OWLOntology ontology, TRexReasoner reasoner, Matrix matrix);
 
     /**
      * Checks for inferences gained from the matrix for the given matrix field.

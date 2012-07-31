@@ -4,7 +4,7 @@ import de.krkm.trex.booleanexpressions.ExpressionMinimizer;
 import de.krkm.trex.booleanexpressions.OrExpression;
 import de.krkm.trex.inference.InferenceStepProvider;
 import de.krkm.trex.inference.Matrix;
-import de.krkm.trex.reasoner.Reasoner;
+import de.krkm.trex.reasoner.TRexReasoner;
 import de.krkm.trex.util.Util;
 import org.semanticweb.owlapi.model.*;
 
@@ -14,12 +14,12 @@ import java.util.Set;
 import static de.krkm.trex.booleanexpressions.ExpressionMinimizer.*;
 
 public class PropertyDisjointnessInferenceStepProvider extends InferenceStepProvider {
-    private Reasoner reasoner;
+    private TRexReasoner reasoner;
     private OWLDataFactory factory;
     private Matrix matrix;
 
     @Override
-    public void initMatrix(OWLOntology ontology, Reasoner reasoner, Matrix matrix) {
+    public void initMatrix(OWLOntology ontology, TRexReasoner reasoner, Matrix matrix) {
         this.matrix = matrix;
         int dimension = matrix.getNamingManager().getNumberOfProperties();
         matrix.setMatrix(new boolean[dimension][dimension]);

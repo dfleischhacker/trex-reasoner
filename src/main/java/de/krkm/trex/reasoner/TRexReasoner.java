@@ -21,12 +21,12 @@ import java.util.Set;
  *
  * @author Daniel Fleischhacker <daniel@informatik.uni-mannheim.de>
  */
-public class Reasoner {
+public class TRexReasoner {
     private OWLOntology ontology;
 
     private OntologyNamingManager namingManager;
 
-    private Logger log = LoggerFactory.getLogger(Reasoner.class);
+    private Logger log = LoggerFactory.getLogger(TRexReasoner.class);
 
     private Matrix conceptSubsumption;
     private Matrix conceptDisjointness;
@@ -43,7 +43,7 @@ public class Reasoner {
      *
      * @param ontology ontology to perform inference on
      */
-    public Reasoner(OWLOntology ontology) {
+    public TRexReasoner(OWLOntology ontology) {
         this.ontology = ontology;
         dataFactory = ontology.getOWLOntologyManager().getOWLDataFactory();
         namingManager = new OntologyNamingManager(ontology);
@@ -87,6 +87,19 @@ public class Reasoner {
         }
     }
 
+    public void registerType(Matrix matrix) {
+        typeToMatrix.put(matrix.getAxiomType(), matrix);
+    }
+
+    /**
+     * Returns the naming manager used by this reasoner
+     *
+     * @return naming manager of this reasoner
+     */
+    public OntologyNamingManager getNamingManager() {
+        return namingManager;
+    }
+
     public Matrix getConceptSubsumption() {
         return conceptSubsumption;
     }
@@ -109,40 +122,6 @@ public class Reasoner {
 
     public Matrix getPropertyRange() {
         return propertyRange;
-    }
-
-    /**
-     * Adds the given axiom into the ontology which is managed by this reasoner instance. Afterwards, a
-     * rematerialization using {@link #rematerialize()} might be required.
-     *
-     * @param axiom axiom to add into ontology
-     */
-    public void addAxiom(OWLAxiom axiom) {
-        Matrix relevantMatrix = typeToMatrix.get(axiom.getAxiomType());
-        relevantMatrix.addAxiom(axiom);
-        ontology.getOWLOntologyManager().addAxiom(ontology, axiom);
-    }
-
-    public void registerType(Matrix matrix) {
-        typeToMatrix.put(matrix.getAxiomType(), matrix);
-    }
-
-    public boolean isEntailed(OWLAxiom axiom) {
-        Matrix relevantMatrix = typeToMatrix.get(axiom.getAxiomType());
-        if (relevantMatrix == null) {
-            throw new UnsupportedOperationException("Reasoner unable to handle axiom type: " + axiom.getAxiomType());
-        }
-
-        return relevantMatrix.isEntailed(axiom);
-    }
-
-    public OrExpression getExplanation(OWLAxiom axiom) {
-        Matrix relevantMatrix = typeToMatrix.get(axiom.getAxiomType());
-        if (relevantMatrix == null) {
-            throw new UnsupportedOperationException("Reasoner unable to handle axiom type: " + axiom.getAxiomType());
-        }
-
-        return relevantMatrix.getExplanation(axiom);
     }
 
     /**
@@ -188,6 +167,53 @@ public class Reasoner {
     }
 
     /**
+     * Returns all axioms supported by this reasoner and entailed by the ontology.
+     *
+     * @return all axioms supported by this reasoner and entailed by the ontology
+     */
+    public Set<OWLAxiom> getAxioms() {
+        HashSet<OWLAxiom> res = new HashSet<OWLAxiom>();
+        res.addAll(conceptSubsumption.getOWLAxioms());
+        res.addAll(conceptDisjointness.getOWLAxioms());
+        res.addAll(propertySubsumption.getOWLAxioms());
+        res.addAll(propertyDomain.getOWLAxioms());
+        res.addAll(propertyDisjointness.getOWLAxioms());
+        res.addAll(propertyRange.getOWLAxioms());
+
+        return res;
+    }
+
+    /**
+     * Adds the given axiom into the ontology which is managed by this reasoner instance. Afterwards, a
+     * rematerialization using {@link #rematerialize()} might be required.
+     *
+     * @param axiom axiom to add into ontology
+     */
+    public void addAxiom(OWLAxiom axiom) {
+        Matrix relevantMatrix = typeToMatrix.get(axiom.getAxiomType());
+        relevantMatrix.addAxiom(axiom);
+        ontology.getOWLOntologyManager().addAxiom(ontology, axiom);
+    }
+
+    public boolean isEntailed(OWLAxiom axiom) {
+        Matrix relevantMatrix = typeToMatrix.get(axiom.getAxiomType());
+        if (relevantMatrix == null) {
+            throw new UnsupportedOperationException("Reasoner unable to handle axiom type: " + axiom.getAxiomType());
+        }
+
+        return relevantMatrix.isEntailed(axiom);
+    }
+
+    public OrExpression getExplanation(OWLAxiom axiom) {
+        Matrix relevantMatrix = typeToMatrix.get(axiom.getAxiomType());
+        if (relevantMatrix == null) {
+            throw new UnsupportedOperationException("Reasoner unable to handle axiom type: " + axiom.getAxiomType());
+        }
+
+        return relevantMatrix.getExplanation(axiom);
+    }
+
+    /**
      * Returns true if the concept identified by the IRI <code>subClass</code> is a subconcept of the concept identified
      * by the IRI <code>superClass</code>.
      *
@@ -209,14 +235,6 @@ public class Reasoner {
      */
     public boolean isSubClassOf(int subClass, int superClass) {
         return conceptSubsumption.get(subClass, superClass);
-    }
-
-    public boolean areDisjointClasses(String class1, String class2) {
-        return conceptDisjointness.get(class1, class2);
-    }
-
-    public boolean areDisjointClasses(int class1, int class2) {
-        return conceptDisjointness.get(class1, class2);
     }
 
     /**
@@ -243,21 +261,20 @@ public class Reasoner {
         return propertySubsumption.get(subProperty, superProperty);
     }
 
+    public boolean areDisjointClasses(String class1, String class2) {
+        return conceptDisjointness.get(class1, class2);
+    }
+
+    public boolean areDisjointClasses(int class1, int class2) {
+        return conceptDisjointness.get(class1, class2);
+    }
+
     public boolean areDisjointProperties(String property1, String property2) {
         return propertyDisjointness.get(property1, property2);
     }
 
     public boolean areDisjointProperties(int property1, int property2) {
         return propertyDisjointness.get(property1, property2);
-    }
-
-    /**
-     * Returns the naming manager used by this reasoner
-     *
-     * @return naming manager of this reasoner
-     */
-    public OntologyNamingManager getNamingManager() {
-        return namingManager;
     }
 
     /**
@@ -288,23 +305,6 @@ public class Reasoner {
                 res.add(dataFactory.getOWLObjectProperty(IRI.create(namingManager.getPropertyIRI(i))));
             }
         }
-
-        return res;
-    }
-
-    /**
-     * Returns all axioms supported by this reasoner and entailed by the ontology.
-     *
-     * @return all axioms supported by this reasoner and entailed by the ontology
-     */
-    public Set<OWLAxiom> getAxioms() {
-        HashSet<OWLAxiom> res = new HashSet<OWLAxiom>();
-        res.addAll(conceptSubsumption.getOWLAxioms());
-        res.addAll(conceptDisjointness.getOWLAxioms());
-        res.addAll(propertySubsumption.getOWLAxioms());
-        res.addAll(propertyDomain.getOWLAxioms());
-        res.addAll(propertyDisjointness.getOWLAxioms());
-        res.addAll(propertyRange.getOWLAxioms());
 
         return res;
     }

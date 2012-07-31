@@ -3,7 +3,7 @@ package de.krkm.trex.inference;
 import de.krkm.trex.booleanexpressions.ExpressionMinimizer;
 import de.krkm.trex.booleanexpressions.OrExpression;
 import de.krkm.trex.reasoner.OntologyNamingManager;
-import de.krkm.trex.reasoner.Reasoner;
+import de.krkm.trex.reasoner.TRexReasoner;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -18,7 +18,7 @@ import java.util.Set;
  */
 public class Matrix {
     private OWLOntology ontology;
-    private Reasoner reasoner;
+    private TRexReasoner reasoner;
     private InferenceStepProvider inferenceStep;
 
     private OntologyNamingManager namingManager;
@@ -36,7 +36,7 @@ public class Matrix {
      * @param namingManager naming manager to resolve IRIs and IDs
      * @param inferenceStep implementing class for inference
      */
-    public Matrix(OWLOntology ontology, Reasoner reasoner, OntologyNamingManager namingManager,
+    public Matrix(OWLOntology ontology, TRexReasoner reasoner, OntologyNamingManager namingManager,
             InferenceStepProvider inferenceStep) {
         this.ontology = ontology;
         this.reasoner = reasoner;
