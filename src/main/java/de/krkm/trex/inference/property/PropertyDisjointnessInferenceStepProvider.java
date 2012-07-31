@@ -1,4 +1,4 @@
-package de.krkm.trex.inference.concept;
+package de.krkm.trex.inference.property;
 
 import de.krkm.trex.booleanexpressions.ExpressionMinimizer;
 import de.krkm.trex.booleanexpressions.OrExpression;
