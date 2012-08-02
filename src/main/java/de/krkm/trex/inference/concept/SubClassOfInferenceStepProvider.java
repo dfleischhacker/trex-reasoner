@@ -35,6 +35,9 @@ public class SubClassOfInferenceStepProvider extends InferenceStepProvider {
             if (!a.getSubClass().isAnonymous() && !a.getSuperClass().isAnonymous()) {
                 String subClassIRI = Util.getFragment(a.getSubClass().asOWLClass().getIRI().toString());
                 String superClassIRI = Util.getFragment(a.getSuperClass().asOWLClass().getIRI().toString());
+                if (subClassIRI.equals(superClassIRI)) {
+                    continue;
+                }
                 matrix.set(subClassIRI, superClassIRI, true);
                 int subId = matrix.getNamingManager().getConceptId(subClassIRI);
                 int superId = matrix.getNamingManager().getConceptId(superClassIRI);

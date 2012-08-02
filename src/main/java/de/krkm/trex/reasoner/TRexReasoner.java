@@ -381,4 +381,15 @@ public class TRexReasoner {
 
         return res;
     }
+
+    public Set<OWLClass> getConceptCycles() {
+        Set<OWLClass> res = new HashSet<OWLClass>();
+        for (int i = 0; i < conceptSubsumption.getDimensionCol(); i++) {
+            if (conceptSubsumption.get(i, i)) {
+                res.add(dataFactory.getOWLClass(IRI.create(namingManager.getConceptIRI(i))));
+            }
+        }
+
+        return res;
+    }
 }
