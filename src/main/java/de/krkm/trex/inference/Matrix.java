@@ -23,10 +23,14 @@ public class Matrix {
 
     private OntologyNamingManager namingManager;
 
-    private boolean[][] matrix;
+    public boolean[][] matrix;
     private OrExpression[][] explanations;
 
     private final static Logger log = LoggerFactory.getLogger(Matrix.class);
+
+    private boolean isSymmetric;
+    public int dimensionRow;
+    public int dimensionCol;
 
     /**
      * Initializes the matrix to work on the given ontology,
@@ -42,6 +46,7 @@ public class Matrix {
         this.reasoner = reasoner;
         this.inferenceStep = inferenceStep;
         this.namingManager = namingManager;
+        this.isSymmetric = inferenceStep.isSymmetric();
 
 //        dimension = namingManager.getNumberOfConcepts();
 //        matrix = new boolean[dimensionRow][dimensionCol];
@@ -55,8 +60,10 @@ public class Matrix {
     /**
      * Returns the row dimension of the matrix.
      *
+     * @deprecated use public member dimensionRow instead
      * @return row dimension of the matrix
      */
+    @Deprecated
     public int getDimensionRow() {
         return matrix == null ? 0 : matrix.length;
     }
@@ -64,14 +71,18 @@ public class Matrix {
     /**
      * Returns the column dimension of the matrix.
      *
+     * @deprecated use public member dimensionCol instead
      * @return column dimension of the matrix
      */
+    @Deprecated
     public int getDimensionCol() {
-        return (matrix == null || matrix.length == 0) ? 0 : matrix[0].length;
+        return dimensionCol;
     }
 
     public void setMatrix(boolean[][] matrix) {
         this.matrix = matrix;
+        this.dimensionRow = matrix.length;
+        this.dimensionCol = matrix[0].length;
     }
 
     public void setExplanations(OrExpression[][] explanations) {
@@ -87,7 +98,7 @@ public class Matrix {
      * @return true if the explanation for the given cell has changed, otherwise false
      */
     public boolean addExplanation(int row, int col, OrExpression expression) {
-        if (inferenceStep.isSymmetric() && row < col) {
+        if (isSymmetric && row < col) {
             int temp = col;
             col = row;
             row = temp;
@@ -109,7 +120,7 @@ public class Matrix {
      * @return clause explanation for axiom
      */
     public OrExpression getExplanation(int row, int col) {
-        if (inferenceStep.isSymmetric() && row < col) {
+        if (isSymmetric && row < col) {
             int temp = col;
             col = row;
             row = temp;
@@ -129,7 +140,7 @@ public class Matrix {
         int indexA = inferenceStep.resolveRowIRI(conceptA);
         int indexB = inferenceStep.resolveColIRI(conceptB);
 
-        if (inferenceStep.isSymmetric() && indexA < indexB) {
+        if (isSymmetric && indexA < indexB) {
             int temp = indexB;
             indexB = indexA;
             indexA = temp;
@@ -154,8 +165,8 @@ public class Matrix {
         while (modified) {
             log.debug("Inference for {}, iteration {}", inferenceStep.getIdentifier(), run++);
             modified = false;
-            for (int i = 0; i < getDimensionRow(); i++) {
-                for (int j = 0; j < getDimensionCol(); j++) {
+            for (int i = 0; i < dimensionRow; i++) {
+                for (int j = 0; j < dimensionCol; j++) {
                     modified = inferenceStep.infer(this, i, j) || modified;
                 }
             }
@@ -185,7 +196,7 @@ public class Matrix {
         int indexA = inferenceStep.resolveRowIRI(conceptA);
         int indexB = inferenceStep.resolveColIRI(conceptB);
 
-        if (inferenceStep.isSymmetric() && indexA < indexB) {
+        if (isSymmetric && indexA < indexB) {
             int temp = indexB;
             indexB = indexA;
             indexA = temp;
@@ -207,7 +218,7 @@ public class Matrix {
             return false;
         }
 
-        if (inferenceStep.isSymmetric() && indexA < indexB) {
+        if (isSymmetric && indexA < indexB) {
             int temp = indexB;
             indexB = indexA;
             indexA = temp;
@@ -225,10 +236,8 @@ public class Matrix {
      * @return value to for concept pair
      */
     public boolean get(int indexA, int indexB) {
-        if (inferenceStep.isSymmetric() && indexA < indexB) {
-            int temp = indexB;
-            indexB = indexA;
-            indexA = temp;
+        if (isSymmetric && indexA < indexB) {
+            return matrix[indexB][indexA];
         }
         return matrix[indexA][indexB];
     }
@@ -258,8 +267,8 @@ public class Matrix {
      */
     public String getAxioms() {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < getDimensionRow(); i++) {
-            for (int j = 0; j < (inferenceStep.isSymmetric() ? i : getDimensionCol()); j++) {
+        for (int i = 0; i < dimensionRow; i++) {
+            for (int j = 0; j < (isSymmetric ? i : dimensionCol); j++) {
                 String axiom = inferenceStep.getAxiomRepresentation(this, i, j);
                 if (axiom != null) {
                     sb.append(axiom).append(" -- ").append(explanations[i][j].toString()).append("\n");
@@ -275,8 +284,8 @@ public class Matrix {
      */
     public Set<OWLAxiom> getOWLAxioms() {
         Set<OWLAxiom> axioms = new HashSet<OWLAxiom>();
-        for (int i = 0; i < getDimensionRow(); i++) {
-            for (int j = 0; j < (inferenceStep.isSymmetric() ? i : getDimensionCol()); j++) {
+        for (int i = 0; i < dimensionRow; i++) {
+            for (int j = 0; j < (isSymmetric ? i : dimensionCol); j++) {
                 OWLAxiom axiom = inferenceStep.getAxiom(this, i, j);
                 if (axiom != null) {
                     axioms.add(axiom);

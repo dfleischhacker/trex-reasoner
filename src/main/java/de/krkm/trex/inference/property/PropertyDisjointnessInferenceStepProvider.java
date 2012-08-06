@@ -56,8 +56,8 @@ public class PropertyDisjointnessInferenceStepProvider extends InferenceStepProv
     @Override
     public boolean infer(Matrix matrix, int row, int col) {
         boolean mod = false;
-        for (int i = 0; i < reasoner.getPropertySubsumption().getDimensionRow(); i++) {
-            if (reasoner.isSubPropertyOf(row, i) && matrix.get(i, col)) {
+        for (int i = 0; i < reasoner.getPropertySubsumption().dimensionRow; i++) {
+            if (reasoner.propertySubsumption.matrix[row][i] && matrix.get(i, col)) {
                 matrix.set(row, col, true);
                 mod = matrix.addExplanation(row, col,
                         ExpressionMinimizer.flatten(reasoner.getPropertySubsumption().getExplanation(row, i),

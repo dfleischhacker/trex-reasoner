@@ -28,9 +28,9 @@ public class TRexReasoner {
 
     private Logger log = LoggerFactory.getLogger(TRexReasoner.class);
 
-    private Matrix conceptSubsumption;
-    private Matrix conceptDisjointness;
-    private Matrix propertySubsumption;
+    public Matrix conceptSubsumption;
+    public Matrix conceptDisjointness;
+    public Matrix propertySubsumption;
     private Matrix propertyDisjointness;
     private Matrix propertyDomain;
     private Matrix propertyRange;
@@ -357,7 +357,7 @@ public class TRexReasoner {
      */
     public Set<OWLClass> getIncoherentClasses() {
         Set<OWLClass> res = new HashSet<OWLClass>();
-        for (int i = 0; i < conceptDisjointness.getDimensionCol(); i++) {
+        for (int i = 0; i < conceptDisjointness.dimensionCol; i++) {
             if (conceptDisjointness.get(i, i)) {
                 res.add(dataFactory.getOWLClass(IRI.create(namingManager.getConceptIRI(i))));
             }
@@ -373,7 +373,7 @@ public class TRexReasoner {
      */
     public Set<OWLObjectProperty> getIncoherentProperties() {
         Set<OWLObjectProperty> res = new HashSet<OWLObjectProperty>();
-        for (int i = 0; i < propertyDisjointness.getDimensionCol(); i++) {
+        for (int i = 0; i < propertyDisjointness.dimensionCol; i++) {
             if (propertyDisjointness.get(i, i)) {
                 res.add(dataFactory.getOWLObjectProperty(IRI.create(namingManager.getPropertyIRI(i))));
             }
@@ -384,7 +384,7 @@ public class TRexReasoner {
 
     public Set<OWLClass> getConceptCycles() {
         Set<OWLClass> res = new HashSet<OWLClass>();
-        for (int i = 0; i < conceptSubsumption.getDimensionCol(); i++) {
+        for (int i = 0; i < conceptSubsumption.dimensionCol; i++) {
             if (conceptSubsumption.get(i, i)) {
                 res.add(dataFactory.getOWLClass(IRI.create(namingManager.getConceptIRI(i))));
             }

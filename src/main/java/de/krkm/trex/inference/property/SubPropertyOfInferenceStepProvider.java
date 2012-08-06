@@ -63,8 +63,8 @@ public class SubPropertyOfInferenceStepProvider extends InferenceStepProvider {
     @Override
     public boolean infer(Matrix matrix, int row, int col) {
         boolean mod = false;
-        for (int i = 0; i < matrix.getDimensionRow(); i++) {
-            if (matrix.get(row, i) && matrix.get(i, col)) {
+        for (int i = 0; i < matrix.dimensionRow; i++) {
+            if (matrix.matrix[row][i] && matrix.matrix[i][col]) {
                 matrix.set(row, col, true);
                 mod = matrix.addExplanation(row, col, ExpressionMinimizer
                         .flatten(matrix.getExplanation(row, i), matrix.getExplanation(i, col))) || mod;
@@ -76,7 +76,7 @@ public class SubPropertyOfInferenceStepProvider extends InferenceStepProvider {
 
     @Override
     public String getAxiomRepresentation(Matrix matrix, int row, int col) {
-        if (matrix.get(row, col)) {
+        if (matrix.matrix[row][col]) {
             return String.format("SubPropertyOf(%s, %s)", matrix.getNamingManager().getPropertyIRI(row),
                     matrix.getNamingManager()
                           .getPropertyIRI(col));
@@ -86,7 +86,7 @@ public class SubPropertyOfInferenceStepProvider extends InferenceStepProvider {
 
     @Override
     public OWLAxiom getAxiom(Matrix matrix, int row, int col) {
-        if (matrix.get(row, col)) {
+        if (matrix.matrix[row][col]) {
             return factory.getOWLSubObjectPropertyOfAxiom(
                     factory.getOWLObjectProperty(IRI.create(getIRIWithNamespace(matrix.getNamingManager().getPropertyIRI(row)))),
                     factory.getOWLObjectProperty(IRI.create(getIRIWithNamespace(matrix.getNamingManager().getPropertyIRI(col)))));

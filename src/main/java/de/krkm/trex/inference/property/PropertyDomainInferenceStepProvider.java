@@ -48,8 +48,8 @@ public class PropertyDomainInferenceStepProvider extends InferenceStepProvider {
         boolean mod = false;
 
         // propagate concept subsumption to property domain
-        for (int i = 0; i < matrix.getDimensionCol(); i++) {
-            if (matrix.get(row, i) && reasoner.getConceptSubsumption().get(col, i)) {
+        for (int i = 0; i < matrix.dimensionCol; i++) {
+            if (matrix.matrix[row][i] && reasoner.conceptSubsumption.matrix[col][i]) {
                 matrix.set(row, col, true);
                 mod = matrix.addExplanation(row, col,
                         ExpressionMinimizer.flatten(matrix.getExplanation(row, i),
@@ -58,8 +58,8 @@ public class PropertyDomainInferenceStepProvider extends InferenceStepProvider {
         }
 
         // propagate property domain according to property subsumption hierarchy
-        for (int i = 0; i < matrix.getDimensionRow(); i++) {
-            if (matrix.get(i, col) && reasoner.getPropertySubsumption().get(row, i)) {
+        for (int i = 0; i < matrix.dimensionRow; i++) {
+            if (matrix.matrix[i][col] && reasoner.propertySubsumption.matrix[row][i]) {
                 matrix.set(row, col, true);
                 mod = matrix.addExplanation(row, col,
                         ExpressionMinimizer.flatten(matrix.getExplanation(i,col),
@@ -72,7 +72,7 @@ public class PropertyDomainInferenceStepProvider extends InferenceStepProvider {
 
     @Override
     public String getAxiomRepresentation(Matrix matrix, int row, int col) {
-        if (matrix.get(row, col)) {
+        if (matrix.matrix[row][col]) {
             return String.format("ObjectPropertyDomain(%s, %s)", matrix.getNamingManager().getPropertyIRI(row),
                     matrix.getNamingManager()
                           .getConceptIRI(col));
@@ -112,7 +112,7 @@ public class PropertyDomainInferenceStepProvider extends InferenceStepProvider {
 
     @Override
     public OWLAxiom getAxiom(Matrix matrix, int row, int col) {
-        if (matrix.get(row, col)) {
+        if (matrix.matrix[row][col]) {
             return factory.getOWLObjectPropertyDomainAxiom(
                     factory.getOWLObjectProperty(
                             IRI.create(getIRIWithNamespace(matrix.getNamingManager().getPropertyIRI(row)))),

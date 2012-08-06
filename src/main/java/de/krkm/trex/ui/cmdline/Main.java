@@ -36,7 +36,7 @@ public class Main {
 
         // search for concepts disjoint to themselves
         log.info("Searching for concepts disjoint to themselves");
-        for (int i = 0; i < r.getConceptDisjointness().getDimensionRow(); i++) {
+        for (int i = 0; i < r.getConceptDisjointness().dimensionRow; i++) {
             if (r.getConceptDisjointness().getExplanation(i, i).getExpressions().size() > 1) {
                 System.out.println(
                         r.getNamingManager().getConceptIRI(i) + ": " + r.getConceptDisjointness().getExplanation(i, i));

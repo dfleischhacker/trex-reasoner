@@ -57,8 +57,8 @@ public class ConceptDisjointnessInferenceStepProvider extends InferenceStepProvi
     @Override
     public boolean infer(Matrix matrix, int row, int col) {
         boolean mod = false;
-        for (int i = 0; i < matrix.getDimensionRow(); i++) {
-            if (reasoner.isSubClassOf(row, i) && matrix.get(col, i)) {
+        for (int i = 0; i < matrix.dimensionRow; i++) {
+            if (reasoner.conceptSubsumption.matrix[row][i] && matrix.get(col, i)) {
                 matrix.set(row, col, true);
                 mod = matrix.addExplanation(row, col,
                         ExpressionMinimizer.flatten(reasoner.getConceptSubsumption().getExplanation(row, i),
