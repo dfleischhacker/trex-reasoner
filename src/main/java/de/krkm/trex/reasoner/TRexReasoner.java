@@ -1,17 +1,17 @@
 package de.krkm.trex.reasoner;
 
+import de.krkm.trex.booleanexpressions.ExpressionMinimizer;
 import de.krkm.trex.booleanexpressions.OrExpression;
 import de.krkm.trex.inference.Matrix;
 import de.krkm.trex.inference.concept.ConceptDisjointnessInferenceStepProvider;
-import de.krkm.trex.inference.property.PropertyDisjointnessInferenceStepProvider;
 import de.krkm.trex.inference.concept.SubClassOfInferenceStepProvider;
-import de.krkm.trex.inference.property.SubPropertyOfInferenceStepProvider;
-import de.krkm.trex.inference.property.PropertyDomainInferenceStepProvider;
-import de.krkm.trex.inference.property.PropertyRangeInferenceStepProvider;
+import de.krkm.trex.inference.property.*;
+import de.krkm.utilities.collectiontostring.CollectionToStringWrapper;
 import org.semanticweb.owlapi.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -31,11 +31,12 @@ public class TRexReasoner {
     public Matrix conceptSubsumption;
     public Matrix conceptDisjointness;
     public Matrix propertySubsumption;
-    private Matrix propertyDisjointness;
-    private Matrix propertyDomain;
-    private Matrix propertyRange;
+    public Matrix propertyDisjointness;
+    public Matrix propertyDomain;
+    public Matrix propertyRange;
+    public Matrix propertyUnsatisfiability;
 
-    private HashMap<AxiomType, Matrix> typeToMatrix = new HashMap<AxiomType, Matrix>();
+    private HashMap<AxiomType, ArrayList<Matrix>> typeToMatrix = new HashMap<AxiomType, ArrayList<Matrix>>();
     private OWLDataFactory dataFactory;
 
     /**
@@ -73,6 +74,11 @@ public class TRexReasoner {
                 new PropertyRangeInferenceStepProvider());
         registerType(propertyRange);
         materializePropertyRange();
+
+        propertyUnsatisfiability = new Matrix(ontology, this, namingManager,
+                new PropertyUnsatisfiabilityInferenceProvider());
+        registerType(propertyUnsatisfiability);
+        materializePropertyUnsatisfiability();
     }
 
     /**
@@ -80,8 +86,10 @@ public class TRexReasoner {
      * introduce new properties or concepts.
      */
     public void rematerialize() {
-        for (Matrix m : typeToMatrix.values()) {
-            m.materialize();
+        for (ArrayList<Matrix> matrices : typeToMatrix.values()) {
+            for (Matrix m : matrices) {
+                m.materialize();
+            }
         }
     }
 
@@ -91,7 +99,10 @@ public class TRexReasoner {
      * @param matrix matrix to register in reasoner
      */
     public void registerType(Matrix matrix) {
-        typeToMatrix.put(matrix.getAxiomType(), matrix);
+        if (!typeToMatrix.containsKey(matrix.getAxiomType())) {
+            typeToMatrix.put(matrix.getAxiomType(), new ArrayList<Matrix>());
+        }
+        typeToMatrix.get(matrix.getAxiomType()).add(matrix);
     }
 
     /**
@@ -199,6 +210,10 @@ public class TRexReasoner {
         propertyRange.materialize();
     }
 
+    private void materializePropertyUnsatisfiability() {
+        propertyUnsatisfiability.materialize();
+    }
+
     /**
      * Returns all axioms supported by this reasoner and entailed by the ontology.
      *
@@ -223,8 +238,9 @@ public class TRexReasoner {
      * @param axiom axiom to add into ontology
      */
     public void addAxiom(OWLAxiom axiom) {
-        Matrix relevantMatrix = typeToMatrix.get(axiom.getAxiomType());
-        relevantMatrix.addAxiom(axiom);
+        for (Matrix relevantMatrix : typeToMatrix.get(axiom.getAxiomType())) {
+            relevantMatrix.addAxiom(axiom);
+        }
         ontology.getOWLOntologyManager().addAxiom(ontology, axiom);
     }
 
@@ -235,12 +251,16 @@ public class TRexReasoner {
      * @return true if the axiom is entailed by the ontology, false otherwise
      */
     public boolean isEntailed(OWLAxiom axiom) {
-        Matrix relevantMatrix = typeToMatrix.get(axiom.getAxiomType());
-        if (relevantMatrix == null) {
-            throw new UnsupportedOperationException("Reasoner unable to handle axiom type: " + axiom.getAxiomType());
+        if (!typeToMatrix.containsKey(axiom.getAxiomType())) {
+            throw new UnsupportedOperationException(
+                    "Reasoner unable to handle axiom type: " + axiom.getAxiomType());
         }
-
-        return relevantMatrix.isEntailed(axiom);
+        for (Matrix relevantMatrix : typeToMatrix.get(axiom.getAxiomType())) {
+            if (relevantMatrix.isEntailed(axiom)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -250,12 +270,21 @@ public class TRexReasoner {
      * @return explanation for given axiom if axiom is entailed, otherwise null
      */
     public OrExpression getExplanation(OWLAxiom axiom) {
-        Matrix relevantMatrix = typeToMatrix.get(axiom.getAxiomType());
-        if (relevantMatrix == null) {
-            throw new UnsupportedOperationException("Reasoner unable to handle axiom type: " + axiom.getAxiomType());
+        if (!typeToMatrix.containsKey(axiom.getAxiomType())) {
+            throw new UnsupportedOperationException(
+                    "Reasoner unable to handle axiom type: " + axiom.getAxiomType());
         }
-
-        return relevantMatrix.getExplanation(axiom);
+        OrExpression explanation = null;
+        for (Matrix relevantMatrix : typeToMatrix.get(axiom.getAxiomType())) {
+            if (explanation == null) {
+                explanation = relevantMatrix.getExplanation(axiom).copy();
+            }
+            else {
+                explanation = ExpressionMinimizer.flatten(explanation, relevantMatrix.getExplanation(axiom));
+            }
+            ExpressionMinimizer.minimize(explanation);
+        }
+        return explanation;
     }
 
     /**
@@ -373,11 +402,19 @@ public class TRexReasoner {
      */
     public Set<OWLObjectProperty> getIncoherentProperties() {
         Set<OWLObjectProperty> res = new HashSet<OWLObjectProperty>();
-        for (int i = 0; i < propertyDisjointness.dimensionCol; i++) {
-            if (propertyDisjointness.get(i, i)) {
+//        for (int i = 0; i < propertyDisjointness.dimensionCol; i++) {
+//            if (propertyDisjointness.get(i, i)) {
+//                res.add(dataFactory.getOWLObjectProperty(IRI.create(namingManager.getPropertyIRI(i))));
+//            }
+//        }
+//        System.out.println("PropDisj: " + new CollectionToStringWrapper(res));
+
+        for (int i = 0; i < propertyUnsatisfiability.dimensionCol; i++) {
+            if (propertyUnsatisfiability.get(0, i)) {
                 res.add(dataFactory.getOWLObjectProperty(IRI.create(namingManager.getPropertyIRI(i))));
             }
         }
+        System.out.println("DR: " + new CollectionToStringWrapper(res));
 
         return res;
     }

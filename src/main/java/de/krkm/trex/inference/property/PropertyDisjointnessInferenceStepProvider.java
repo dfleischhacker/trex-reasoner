@@ -83,7 +83,7 @@ public class PropertyDisjointnessInferenceStepProvider extends InferenceStepProv
                     matrix.getNamingManager().getPropertyIRI(row)))));
             props.add(factory.getOWLObjectProperty(IRI.create(getIRIWithNamespace(
                     matrix.getNamingManager().getPropertyIRI(col)))));
-            return factory.getOWLDisjointObjectPropertiesAxiom();
+            return factory.getOWLDisjointObjectPropertiesAxiom(props);
         }
         return null;
     }

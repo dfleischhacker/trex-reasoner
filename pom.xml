@@ -118,5 +118,10 @@
             <artifactId>logback-classic</artifactId>
             <version>1.0.0</version>
         </dependency>
+        <dependency>
+            <groupId>de.krkm.utilities.collectiontostring</groupId>
+            <artifactId>collection-to-string-wrapper</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 </project>
