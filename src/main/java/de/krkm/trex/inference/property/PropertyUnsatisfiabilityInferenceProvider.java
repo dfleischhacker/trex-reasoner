@@ -7,6 +7,9 @@ import de.krkm.trex.inference.Matrix;
 import de.krkm.trex.reasoner.TRexReasoner;
 import org.semanticweb.owlapi.model.*;
 
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -21,6 +24,16 @@ public class PropertyUnsatisfiabilityInferenceProvider extends InferenceStepProv
 
     @Override
     public void initMatrix(OWLOntology ontology, TRexReasoner reasoner, Matrix matrix) {
+        FileWriter out = null;
+        try {
+            out = new FileWriter("/home/daniel/propunsat.log");
+        }
+        catch (FileNotFoundException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+        catch (IOException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
         this.reasoner = reasoner;
         this.factory = ontology.getOWLOntologyManager().getOWLDataFactory();
         this.matrix = matrix;
@@ -32,50 +45,122 @@ public class PropertyUnsatisfiabilityInferenceProvider extends InferenceStepProv
         matrix.setExplanations(new OrExpression[1][dimension]);
 
 
+        // create list of disjoint concepts
+        ArrayList<Integer[]> disjointConcepts = new ArrayList<Integer[]>();
+        for (int i = 0; i < reasoner.conceptDisjointness.dimensionRow; i++) {
+            for (int j = 0; j < i; j++) {
+                if (reasoner.conceptDisjointness.matrix[i][j]) {
+                    disjointConcepts.add(new Integer[]{i, j});
+                }
+            }
+        }
+
         for (int k = 0; k < dimension; k++) {
-            for (int i = 0; i < reasoner.conceptDisjointness.dimensionRow; i++) {
-                for (int j = 0; j < i; j++) {
-                    if (!reasoner.conceptDisjointness.matrix[i][j]) {
-                        continue;
+            for (Integer[] cood : disjointConcepts) {
+                int i = cood[0];
+                int j = cood[1];
+                if (reasoner.propertyDomain.matrix[k][i] && reasoner.propertyDomain.matrix[k][j]) {
+                    matrix.matrix[0][k] = true;
+                    OrExpression curExplanation = matrix.getExplanation(0, k);
+                    try {
+                        out.write("************************************* Domain ******************\n" +
+                                "Unsat Prop: " + reasoner.getNamingManager().getPropertyIRI(k) + "\n" +
+                                "Previous explanation:" + String
+                                        .valueOf(curExplanation) + "\n");
+
+                        out.write("\n");
                     }
-                    System.out.println(k + " " + i + "  " + j);
-                    if (reasoner.propertyDomain.matrix[k][i] && reasoner.propertyDomain.matrix[k][j]) {
-                        System.out.println("Domain");
-                        matrix.matrix[0][k] = true;
-                        matrix.addExplanation(0, k, ExpressionMinimizer.flatten(ExpressionMinimizer
-                                .flatten(reasoner.conceptDisjointness.getExplanation(i, j),
-                                        reasoner.propertyDomain.getExplanation(k, i)),
-                                matrix.getExplanation(0, k) == null ? reasoner.propertyDomain.getExplanation(k, i) :
-                                        ExpressionMinimizer.flatten(reasoner.propertyDomain.getExplanation(k, i),
-                                                matrix.getExplanation(0, k))));
+                    catch (IOException e) {
+                        e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
                     }
-                    if (reasoner.propertyRange.matrix[k][i] && reasoner.propertyRange.matrix[k][j]) {
-                        System.out.println("Range");
-                        matrix.matrix[0][k] = true;
-                        matrix.addExplanation(0, k,
-                                ExpressionMinimizer.flatten(
-                                        ExpressionMinimizer.flatten(
-                                                reasoner.conceptDisjointness.getExplanation(i, j),
-                                                reasoner.propertyRange.getExplanation(k, i)
-                                        ),
-                                        matrix.getExplanation(0, k) == null ?
-                                                reasoner.propertyRange.getExplanation(k, i) :
-                                                ExpressionMinimizer.flatten(
-                                                        reasoner.propertyRange.getExplanation(k, i),
-                                                        matrix.getExplanation(0, k)
-                                                )
-                                )
-                        );
+                    OrExpression explDisjoint = reasoner.conceptDisjointness.getExplanation(i, j);
+                    OrExpression explDomainKI = reasoner.propertyDomain.getExplanation(k, i);
+                    OrExpression explDomainKJ = reasoner.propertyDomain.getExplanation(k, j);
+
+
+                    OrExpression flattenedDomain = ExpressionMinimizer
+                            .flatten(explDomainKJ,
+                                    explDomainKI);
+                    OrExpression flattenedDomainDisjoint = ExpressionMinimizer.flatten(flattenedDomain,
+                            explDisjoint);
+                    try {
+                        out.write("Disjoint Expl: " + explDisjoint + "\n");
+                        out.write("Domain KI Expl: " + explDomainKI + "\n");
+                        out.write("Domain KJ Expl: " + explDomainKJ + "\n");
+                        out.write("Flattened Domain: " + flattenedDomain + "\n");
+                        out.write("Flattened DD: " + flattenedDomainDisjoint + "\n");
+                    }
+                    catch (IOException e) {
+                        e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                    }
+                    matrix.addExplanation(0, k, flattenedDomainDisjoint);
+                    try {
+                        out.write("Resulting Explanation: " + matrix.getExplanation(0, k));
+                        out.write("\n");
+                    }
+                    catch (IOException e) {
+                        e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                    }
+                }
+                if (reasoner.propertyRange.matrix[k][i] && reasoner.propertyRange.matrix[k][j]) {
+                    matrix.matrix[0][k] = true;
+                    OrExpression curExplanation = matrix.getExplanation(0, k);
+                    try {
+                        out.write("************************************* Range *********************\n" +
+                                "Unsat Prop: " + reasoner.getNamingManager().getPropertyIRI(k) + "\n" +
+                                "Previous explanation:" + String
+                                .valueOf(curExplanation) + "\n");
+
+                        out.write("\n");
+                    }
+                    catch (IOException e) {
+                        e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                    }
+                    OrExpression explDisjoint = reasoner.conceptDisjointness.getExplanation(i, j);
+                    OrExpression explRangeKI = reasoner.propertyRange.getExplanation(k, i);
+                    OrExpression explRangeKJ = reasoner.propertyRange.getExplanation(k, j);
+
+
+                    OrExpression flattenedRange = ExpressionMinimizer
+                            .flatten(explRangeKJ,
+                                    explRangeKI);
+                    OrExpression flattenedRangeDisjoint = ExpressionMinimizer.flatten(flattenedRange,
+                            explDisjoint);
+                    try {
+                        out.write("Disjoint Expl: " + explDisjoint + "\n");
+                        out.write("Range KI Expl: " + explRangeKI + "\n");
+                        out.write("Range KJ Expl: " + explRangeKJ + "\n");
+                        out.write("Flattened Range: " + flattenedRange + "\n");
+                        out.write("Flattened RD: " + flattenedRangeDisjoint + "\n");
+                    }
+                    catch (IOException e) {
+                        e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                    }
+                    matrix.addExplanation(0, k, flattenedRangeDisjoint);
+                    try {
+                        out.write("Resulting Explanation: " + matrix.getExplanation(0, k));
+                        out.write("\n");
+                    }
+                    catch (IOException e) {
+                        e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
                     }
                 }
             }
-
+        }
+        if (out != null) {
+            try {
+                out.close();
+            }
+            catch (IOException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
         }
     }
 
+
     @Override
     public boolean infer(Matrix matrix, int row, int col) {
-        return matrix.matrix[row][col];
+        return false;
     }
 
     @Override

@@ -402,12 +402,12 @@ public class TRexReasoner {
      */
     public Set<OWLObjectProperty> getIncoherentProperties() {
         Set<OWLObjectProperty> res = new HashSet<OWLObjectProperty>();
-//        for (int i = 0; i < propertyDisjointness.dimensionCol; i++) {
-//            if (propertyDisjointness.get(i, i)) {
-//                res.add(dataFactory.getOWLObjectProperty(IRI.create(namingManager.getPropertyIRI(i))));
-//            }
-//        }
-//        System.out.println("PropDisj: " + new CollectionToStringWrapper(res));
+        for (int i = 0; i < propertyDisjointness.dimensionCol; i++) {
+            if (propertyDisjointness.get(i, i)) {
+                res.add(dataFactory.getOWLObjectProperty(IRI.create(namingManager.getPropertyIRI(i))));
+            }
+        }
+        System.out.println("PropDisj: " + new CollectionToStringWrapper(res));
 
         for (int i = 0; i < propertyUnsatisfiability.dimensionCol; i++) {
             if (propertyUnsatisfiability.get(0, i)) {

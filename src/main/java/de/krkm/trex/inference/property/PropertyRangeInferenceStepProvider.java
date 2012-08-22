@@ -47,11 +47,11 @@ public class PropertyRangeInferenceStepProvider extends InferenceStepProvider {
         boolean mod = false;
         // propagate concept subsumption to property domain
         for (int i = 0; i < matrix.dimensionCol; i++) {
-            if (matrix.matrix[row][i] && reasoner.conceptSubsumption.matrix[col][i]) {
+            if (matrix.matrix[row][i] && reasoner.conceptSubsumption.matrix[i][col]) {
                 matrix.set(row, col, true);
                 mod = matrix.addExplanation(row, col,
                         ExpressionMinimizer.flatten(matrix.getExplanation(row, i),
-                                reasoner.getConceptSubsumption().getExplanation(col, i))) || mod;
+                                reasoner.getConceptSubsumption().getExplanation(i, col))) || mod;
             }
         }
 
