@@ -6,7 +6,6 @@ import de.krkm.trex.inference.Matrix;
 import de.krkm.trex.inference.concept.ConceptDisjointnessInferenceStepProvider;
 import de.krkm.trex.inference.concept.SubClassOfInferenceStepProvider;
 import de.krkm.trex.inference.property.*;
-import de.krkm.utilities.collectiontostring.CollectionToStringWrapper;
 import org.semanticweb.owlapi.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -407,14 +406,12 @@ public class TRexReasoner {
                 res.add(dataFactory.getOWLObjectProperty(IRI.create(namingManager.getPropertyIRI(i))));
             }
         }
-        System.out.println("PropDisj: " + new CollectionToStringWrapper(res));
 
         for (int i = 0; i < propertyUnsatisfiability.dimensionCol; i++) {
             if (propertyUnsatisfiability.get(0, i)) {
                 res.add(dataFactory.getOWLObjectProperty(IRI.create(namingManager.getPropertyIRI(i))));
             }
         }
-        System.out.println("DR: " + new CollectionToStringWrapper(res));
 
         return res;
     }
