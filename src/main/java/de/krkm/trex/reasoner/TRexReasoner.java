@@ -35,15 +35,22 @@ public class TRexReasoner {
     public Matrix propertyRange;
     public Matrix propertyUnsatisfiability;
 
+    private boolean conceptOnly;
+
     private HashMap<AxiomType, ArrayList<Matrix>> typeToMatrix = new HashMap<AxiomType, ArrayList<Matrix>>();
     private OWLDataFactory dataFactory;
+
+    public TRexReasoner(OWLOntology ontology) {
+        this(ontology, false);
+    }
 
     /**
      * Initializes the reasoner to perform inference on the given ontology.
      *
      * @param ontology ontology to perform inference on
      */
-    public TRexReasoner(OWLOntology ontology) {
+    public TRexReasoner(OWLOntology ontology, boolean conceptOnly) {
+        this.conceptOnly = conceptOnly;
         this.ontology = ontology;
         dataFactory = ontology.getOWLOntologyManager().getOWLDataFactory();
         namingManager = new OntologyNamingManager(ontology);
@@ -55,30 +62,33 @@ public class TRexReasoner {
         registerType(conceptDisjointness);
         materializeConceptDisjointness();
 
-        propertySubsumption = new Matrix(ontology, this, namingManager, new SubPropertyOfInferenceStepProvider());
-        registerType(propertySubsumption);
-        materializePropertySubsumption();
+        if (!conceptOnly) {
+            propertySubsumption = new Matrix(ontology, this, namingManager, new SubPropertyOfInferenceStepProvider());
+            registerType(propertySubsumption);
+            materializePropertySubsumption();
 
-        propertyDisjointness = new Matrix(ontology, this, namingManager,
-                new PropertyDisjointnessInferenceStepProvider());
-        registerType(propertyDisjointness);
-        materializePropertyDisjointness();
+            propertyDisjointness = new Matrix(ontology, this, namingManager,
+                    new PropertyDisjointnessInferenceStepProvider());
+            registerType(propertyDisjointness);
+            materializePropertyDisjointness();
 
-        propertyDomain = new Matrix(ontology, this, namingManager,
-                new PropertyDomainInferenceStepProvider());
-        registerType(propertyDomain);
-        materializePropertyDomain();
+            propertyDomain = new Matrix(ontology, this, namingManager,
+                    new PropertyDomainInferenceStepProvider());
+            registerType(propertyDomain);
+            materializePropertyDomain();
 
-        propertyRange = new Matrix(ontology, this, namingManager,
-                new PropertyRangeInferenceStepProvider());
-        registerType(propertyRange);
-        materializePropertyRange();
+            propertyRange = new Matrix(ontology, this, namingManager,
+                    new PropertyRangeInferenceStepProvider());
+            registerType(propertyRange);
+            materializePropertyRange();
 
-        propertyUnsatisfiability = new Matrix(ontology, this, namingManager,
-                new PropertyUnsatisfiabilityInferenceProvider());
-        registerType(propertyUnsatisfiability);
-        materializePropertyUnsatisfiability();
+            propertyUnsatisfiability = new Matrix(ontology, this, namingManager,
+                    new PropertyUnsatisfiabilityInferenceProvider());
+            registerType(propertyUnsatisfiability);
+            materializePropertyUnsatisfiability();
+        }
     }
+
 
     /**
      * Re-runs the materialization step for this reasoner. In this process only new axioms are considered which do not
@@ -222,11 +232,13 @@ public class TRexReasoner {
         HashSet<OWLAxiom> res = new HashSet<OWLAxiom>();
         res.addAll(conceptSubsumption.getOWLAxioms());
         res.addAll(conceptDisjointness.getOWLAxioms());
-        res.addAll(propertySubsumption.getOWLAxioms());
-        res.addAll(propertyDomain.getOWLAxioms());
-        res.addAll(propertyDisjointness.getOWLAxioms());
-        res.addAll(propertyRange.getOWLAxioms());
 
+        if (!conceptOnly) {
+            res.addAll(propertySubsumption.getOWLAxioms());
+            res.addAll(propertyDomain.getOWLAxioms());
+            res.addAll(propertyDisjointness.getOWLAxioms());
+            res.addAll(propertyRange.getOWLAxioms());
+        }
         return res;
     }
 
@@ -277,8 +289,7 @@ public class TRexReasoner {
         for (Matrix relevantMatrix : typeToMatrix.get(axiom.getAxiomType())) {
             if (explanation == null) {
                 explanation = relevantMatrix.getExplanation(axiom).copy();
-            }
-            else {
+            } else {
                 explanation = ExpressionMinimizer.flatten(explanation, relevantMatrix.getExplanation(axiom));
             }
             ExpressionMinimizer.minimize(explanation);
@@ -421,6 +432,17 @@ public class TRexReasoner {
         for (int i = 0; i < conceptSubsumption.dimensionCol; i++) {
             if (conceptSubsumption.get(i, i)) {
                 res.add(dataFactory.getOWLClass(IRI.create(namingManager.getConceptIRI(i))));
+            }
+        }
+
+        return res;
+    }
+
+    public Set<OWLObjectProperty> getPropertyCycles() {
+        Set<OWLObjectProperty> res = new HashSet<OWLObjectProperty>();
+        for (int i = 0; i < conceptSubsumption.dimensionCol; i++) {
+            if (conceptSubsumption.get(i, i)) {
+                res.add(dataFactory.getOWLObjectProperty(IRI.create(namingManager.getPropertyIRI(i))));
             }
         }
 
