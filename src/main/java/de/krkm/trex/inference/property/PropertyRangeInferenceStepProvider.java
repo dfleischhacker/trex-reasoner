@@ -17,12 +17,14 @@ public class PropertyRangeInferenceStepProvider extends InferenceStepProvider {
     private TRexReasoner reasoner;
     private OWLDataFactory factory;
     private Matrix matrix;
+    private boolean generateExplanations;
 
     @Override
     public void initMatrix(OWLOntology ontology, TRexReasoner reasoner, Matrix matrix) {
         this.reasoner = reasoner;
         this.factory = ontology.getOWLOntologyManager().getOWLDataFactory();
         this.matrix = matrix;
+        this.generateExplanations = reasoner.isGenerateExplanations();
 
         int dimensionCol = matrix.getNamingManager().getNumberOfConcepts();
         int dimensionRow = matrix.getNamingManager().getNumberOfProperties();
@@ -34,10 +36,12 @@ public class PropertyRangeInferenceStepProvider extends InferenceStepProvider {
                 String propertyIRI = Util.getFragment(a.getProperty().asOWLObjectProperty().getIRI().toString());
                 String rangeIRI = Util.getFragment(a.getRange().asOWLClass().getIRI().toString());
                 matrix.set(propertyIRI, rangeIRI, true);
-                int subId = matrix.getNamingManager().getPropertyId(propertyIRI);
-                int superId = matrix.getNamingManager().getConceptId(rangeIRI);
-                matrix.addExplanation(subId, superId,
-                        or(and(literal(a.getAxiomWithoutAnnotations()))));
+                if (generateExplanations) {
+                    int subId = matrix.getNamingManager().getPropertyId(propertyIRI);
+                    int superId = matrix.getNamingManager().getConceptId(rangeIRI);
+                    matrix.addExplanation(subId, superId,
+                            or(and(literal(a.getAxiomWithoutAnnotations()))));
+                }
             }
         }
     }
@@ -48,20 +52,24 @@ public class PropertyRangeInferenceStepProvider extends InferenceStepProvider {
         // propagate concept subsumption to property domain
         for (int i = 0; i < matrix.dimensionCol; i++) {
             if (matrix.matrix[row][i] && reasoner.conceptSubsumption.matrix[i][col]) {
-                matrix.set(row, col, true);
-                mod = matrix.addExplanation(row, col,
-                        ExpressionMinimizer.flatten(matrix.getExplanation(row, i),
-                                reasoner.getConceptSubsumption().getExplanation(i, col))) || mod;
+                mod = matrix.set(row, col, true) || mod;
+                if (generateExplanations) {
+                    mod = matrix.addExplanation(row, col,
+                            ExpressionMinimizer.flatten(matrix.getExplanation(row, i),
+                                    reasoner.getConceptSubsumption().getExplanation(i, col))) || mod;
+                }
             }
         }
 
         // propagate property domain according to property subsumption hierarchy
         for (int i = 0; i < matrix.dimensionRow; i++) {
             if (matrix.matrix[i][col] && reasoner.propertySubsumption.matrix[row][i]) {
-                matrix.set(row, col, true);
-                mod = matrix.addExplanation(row, col,
-                        ExpressionMinimizer.flatten(matrix.getExplanation(i,col),
-                                reasoner.getPropertySubsumption().getExplanation(row,i))) || mod;
+                mod = matrix.set(row, col, true) || mod;
+                if (generateExplanations) {
+                    mod = matrix.addExplanation(row, col,
+                            ExpressionMinimizer.flatten(matrix.getExplanation(i,col),
+                                    reasoner.getPropertySubsumption().getExplanation(row,i))) || mod;
+                }
             }
         }
 

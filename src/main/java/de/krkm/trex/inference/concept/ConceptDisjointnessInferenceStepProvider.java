@@ -17,15 +17,18 @@ public class ConceptDisjointnessInferenceStepProvider extends InferenceStepProvi
     private TRexReasoner reasoner;
     private OWLDataFactory factory;
     private Matrix matrix;
+    private boolean generateExplanations;
 
     @Override
     public void initMatrix(OWLOntology ontology, TRexReasoner reasoner, Matrix matrix) {
         this.reasoner = reasoner;
+        this.generateExplanations = reasoner.isGenerateExplanations();
         this.matrix = matrix;
         this.factory = ontology.getOWLOntologyManager().getOWLDataFactory();
         int dimension = matrix.getNamingManager().getNumberOfConcepts();
         matrix.setMatrix(new boolean[dimension][dimension]);
         matrix.setExplanations(new OrExpression[dimension][dimension]);
+
 
         Set<OWLDisjointClassesAxiom> disjointClassesAxiomSet = ontology.getAxioms(AxiomType.DISJOINT_CLASSES);
         for (OWLDisjointClassesAxiom a : disjointClassesAxiomSet) {
@@ -41,10 +44,12 @@ public class ConceptDisjointnessInferenceStepProvider extends InferenceStepProvi
                             String iriI = Util.getFragment(disjointClasses[i].asOWLClass().getIRI().toString());
                             String iriJ = Util.getFragment(disjointClasses[j].asOWLClass().getIRI().toString());
                             matrix.set(iriI, iriJ, true);
-                            int idI = matrix.getNamingManager().getConceptId(iriI);
-                            int idJ = matrix.getNamingManager().getConceptId(iriJ);
-                            matrix.set(iriI, iriJ, true);
-                            matrix.addExplanation(idI, idJ, or(and(literal(p.getAxiomWithoutAnnotations()))));
+                            if (generateExplanations) {
+                                int idI = matrix.getNamingManager().getConceptId(iriI);
+                                int idJ = matrix.getNamingManager().getConceptId(iriJ);
+                                matrix.set(iriI, iriJ, true);
+                                matrix.addExplanation(idI, idJ, or(and(literal(p.getAxiomWithoutAnnotations()))));
+                            }
                         }
                     }
                 }
@@ -59,12 +64,17 @@ public class ConceptDisjointnessInferenceStepProvider extends InferenceStepProvi
         boolean mod = false;
         for (int i = 0; i < matrix.dimensionRow; i++) {
             if (reasoner.conceptSubsumption.matrix[row][i] && matrix.get(col, i)) {
-                matrix.set(row, col, true);
-                mod = matrix.addExplanation(row, col,
-                        ExpressionMinimizer.flatten(reasoner.getConceptSubsumption().getExplanation(row, i),
-                                matrix.getExplanation(i, col))) || mod;
+                log.debug("Previous values: {} {} --> mod {}", new Object[]{row, col, mod});
+                mod = matrix.set(row, col, true) || mod;
+                log.debug("Previous values: new mod {}", mod);
+                if (generateExplanations) {
+                    mod = matrix.addExplanation(row, col,
+                            ExpressionMinimizer.flatten(reasoner.conceptSubsumption.getExplanation(row, i),
+                                    matrix.getExplanation(i, col))) || mod;
+                }
             }
         }
+        log.debug("Returning mod {}", mod);
         return mod;
     }
 

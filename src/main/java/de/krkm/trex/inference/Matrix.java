@@ -32,8 +32,10 @@ public class Matrix {
     public int dimensionRow;
     public int dimensionCol;
 
+    private boolean generateExplanations;
+
     /**
-     * Initializes the matrix to work on the given ontology,
+     * Initializes the matrix to work on the given ontology with explanation support.
      *
      * @param ontology      ontology to work on
      * @param reasoner      reasoner this matrix belongs to
@@ -42,11 +44,26 @@ public class Matrix {
      */
     public Matrix(OWLOntology ontology, TRexReasoner reasoner, OntologyNamingManager namingManager,
             InferenceStepProvider inferenceStep) {
+        this(ontology, reasoner, namingManager, inferenceStep, true);
+    }
+
+    /**
+     * Initializes the matrix to work on the given ontology,
+     *
+     * @param ontology             ontology to work on
+     * @param reasoner             reasoner this matrix belongs to
+     * @param namingManager        naming manager to resolve IRIs and IDs
+     * @param inferenceStep        implementing class for inference
+     * @param generateExplanations if true explanations are generated, otherwise no explanations are available
+     */
+    public Matrix(OWLOntology ontology, TRexReasoner reasoner, OntologyNamingManager namingManager,
+            InferenceStepProvider inferenceStep, boolean generateExplanations) {
         this.ontology = ontology;
         this.reasoner = reasoner;
         this.inferenceStep = inferenceStep;
         this.namingManager = namingManager;
         this.isSymmetric = inferenceStep.isSymmetric();
+        this.generateExplanations = generateExplanations;
 
 //        dimension = namingManager.getNumberOfConcepts();
 //        matrix = new boolean[dimensionRow][dimensionCol];
@@ -60,8 +77,8 @@ public class Matrix {
     /**
      * Returns the row dimension of the matrix.
      *
-     * @deprecated use public member dimensionRow instead
      * @return row dimension of the matrix
+     * @deprecated use public member dimensionRow instead
      */
     @Deprecated
     public int getDimensionRow() {
@@ -71,8 +88,8 @@ public class Matrix {
     /**
      * Returns the column dimension of the matrix.
      *
-     * @deprecated use public member dimensionCol instead
      * @return column dimension of the matrix
+     * @deprecated use public member dimensionCol instead
      */
     @Deprecated
     public int getDimensionCol() {
@@ -86,6 +103,9 @@ public class Matrix {
     }
 
     public void setExplanations(OrExpression[][] explanations) {
+        if (!generateExplanations) {
+            return;
+        }
         this.explanations = explanations;
     }
 
@@ -98,6 +118,9 @@ public class Matrix {
      * @return true if the explanation for the given cell has changed, otherwise false
      */
     public boolean addExplanation(int row, int col, OrExpression expression) {
+        if (!generateExplanations) {
+            return false;
+        }
         if (isSymmetric && row < col) {
             int temp = col;
             col = row;
@@ -120,6 +143,10 @@ public class Matrix {
      * @return clause explanation for axiom
      */
     public OrExpression getExplanation(int row, int col) {
+        if (!generateExplanations) {
+            throw new UnsupportedOperationException(
+                    "Trying to retrieve explanations from an reasoner with disabled explanation support");
+        }
         if (isSymmetric && row < col) {
             int temp = col;
             col = row;
@@ -214,14 +241,14 @@ public class Matrix {
      * @return true if the value has changed, i.e., was not val before
      */
     public boolean set(int indexA, int indexB, boolean val) {
-        if (matrix[indexA][indexB] == val) {
-            return false;
-        }
-
         if (isSymmetric && indexA < indexB) {
             int temp = indexB;
             indexB = indexA;
             indexA = temp;
+        }
+
+        if (matrix[indexA][indexB] == val) {
+            return false;
         }
 
         matrix[indexA][indexB] = val;

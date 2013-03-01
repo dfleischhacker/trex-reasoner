@@ -17,6 +17,7 @@ public class PropertyDisjointnessInferenceStepProvider extends InferenceStepProv
     private TRexReasoner reasoner;
     private OWLDataFactory factory;
     private Matrix matrix;
+    private boolean generateExplanations;
 
     @Override
     public void initMatrix(OWLOntology ontology, TRexReasoner reasoner, Matrix matrix) {
@@ -26,6 +27,7 @@ public class PropertyDisjointnessInferenceStepProvider extends InferenceStepProv
         matrix.setExplanations(new OrExpression[dimension][dimension]);
 
         this.reasoner = reasoner;
+        this.generateExplanations = reasoner.isGenerateExplanations();
         this.factory = ontology.getOWLOntologyManager().getOWLDataFactory();
         Set<OWLDisjointObjectPropertiesAxiom> disjointPropertyAxiomSet = ontology.getAxioms(
                 AxiomType.DISJOINT_OBJECT_PROPERTIES);
@@ -42,11 +44,13 @@ public class PropertyDisjointnessInferenceStepProvider extends InferenceStepProv
                         String iriI = Util.getFragment(disjointProperties[i].asOWLObjectProperty().getIRI().toString());
                         String iriJ = Util.getFragment(disjointProperties[j].asOWLObjectProperty().getIRI().toString());
                         matrix.set(iriI, iriJ, true);
-                        int idI = matrix.getNamingManager().getPropertyId(iriI);
-                        int idJ = matrix.getNamingManager().getPropertyId(iriJ);
-                        matrix.set(iriI, iriJ, true);
-                        matrix.addExplanation(idI, idJ,
-                                or(and(literal(a.getAxiomWithoutAnnotations()))));
+                        if (generateExplanations) {
+                            int idI = matrix.getNamingManager().getPropertyId(iriI);
+                            int idJ = matrix.getNamingManager().getPropertyId(iriJ);
+                            matrix.set(iriI, iriJ, true);
+                            matrix.addExplanation(idI, idJ,
+                                    or(and(literal(a.getAxiomWithoutAnnotations()))));
+                        }
                     }
                 }
             }
@@ -56,12 +60,17 @@ public class PropertyDisjointnessInferenceStepProvider extends InferenceStepProv
     @Override
     public boolean infer(Matrix matrix, int row, int col) {
         boolean mod = false;
-        for (int i = 0; i < reasoner.getPropertySubsumption().dimensionRow; i++) {
+        for (int i = 0; i < reasoner.propertySubsumption.dimensionRow; i++) {
             if (reasoner.propertySubsumption.matrix[row][i] && matrix.get(i, col)) {
-                matrix.set(row, col, true);
-                mod = matrix.addExplanation(row, col,
-                        ExpressionMinimizer.flatten(reasoner.getPropertySubsumption().getExplanation(row, i),
-                                matrix.getExplanation(i, col))) || mod;
+                mod = matrix.set(row, col, true) || mod;
+                if (generateExplanations) {
+                    mod = matrix.addExplanation(row, col,
+                            ExpressionMinimizer.flatten(reasoner.propertySubsumption.getExplanation(row, i),
+                                    matrix.getExplanation(i, col))) || mod;
+                }
+                if (mod) {
+                    break;
+                }
             }
         }
         return mod;

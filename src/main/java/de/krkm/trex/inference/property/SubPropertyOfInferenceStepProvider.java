@@ -17,6 +17,7 @@ public class SubPropertyOfInferenceStepProvider extends InferenceStepProvider {
     private TRexReasoner reasoner;
     private OWLDataFactory factory;
     private Matrix matrix;
+    private boolean generateExplanations;
 
     @Override
     public void initMatrix(OWLOntology ontology, TRexReasoner reasoner, Matrix matrix) {
@@ -27,6 +28,7 @@ public class SubPropertyOfInferenceStepProvider extends InferenceStepProvider {
         this.matrix = matrix;
 
         this.reasoner = reasoner;
+        this.generateExplanations = reasoner.isGenerateExplanations();
         this.factory = ontology.getOWLOntologyManager().getOWLDataFactory();
         // stated subsumption
         for (OWLSubObjectPropertyOfAxiom a : ontology.getAxioms(AxiomType.SUB_OBJECT_PROPERTY)) {
@@ -35,10 +37,12 @@ public class SubPropertyOfInferenceStepProvider extends InferenceStepProvider {
                 String superPropertyIRI = Util
                         .getFragment(a.getSuperProperty().asOWLObjectProperty().getIRI().toString());
                 matrix.set(subPropertyIRI, superPropertyIRI, true);
-                int subId = matrix.getNamingManager().getPropertyId(subPropertyIRI);
-                int superId = matrix.getNamingManager().getPropertyId(superPropertyIRI);
-                matrix.addExplanation(subId, superId,
-                        or(and(literal(a.getAxiomWithoutAnnotations()))));
+                if (generateExplanations) {
+                    int subId = matrix.getNamingManager().getPropertyId(subPropertyIRI);
+                    int superId = matrix.getNamingManager().getPropertyId(superPropertyIRI);
+                    matrix.addExplanation(subId, superId,
+                            or(and(literal(a.getAxiomWithoutAnnotations()))));
+                }
             }
         }
 
@@ -51,10 +55,12 @@ public class SubPropertyOfInferenceStepProvider extends InferenceStepProvider {
                     String superPropertyIRI = Util
                             .getFragment(a.getSuperProperty().asOWLObjectProperty().getIRI().toString());
                     matrix.set(subPropertyIRI, superPropertyIRI, true);
-                    int subId = matrix.getNamingManager().getPropertyId(subPropertyIRI);
-                    int superId = matrix.getNamingManager().getPropertyId(superPropertyIRI);
-                    matrix.addExplanation(subId, superId,
-                            or(and(literal(a))));
+                    if (generateExplanations) {
+                        int subId = matrix.getNamingManager().getPropertyId(subPropertyIRI);
+                        int superId = matrix.getNamingManager().getPropertyId(superPropertyIRI);
+                        matrix.addExplanation(subId, superId,
+                                or(and(literal(a))));
+                    }
                 }
             }
         }
@@ -65,9 +71,11 @@ public class SubPropertyOfInferenceStepProvider extends InferenceStepProvider {
         boolean mod = false;
         for (int i = 0; i < matrix.dimensionRow; i++) {
             if (matrix.matrix[row][i] && matrix.matrix[i][col]) {
-                matrix.set(row, col, true);
-                mod = matrix.addExplanation(row, col, ExpressionMinimizer
-                        .flatten(matrix.getExplanation(row, i), matrix.getExplanation(i, col))) || mod;
+                mod = matrix.set(row, col, true) || mod;
+                if (generateExplanations) {
+                    mod = matrix.addExplanation(row, col, ExpressionMinimizer
+                            .flatten(matrix.getExplanation(row, i), matrix.getExplanation(i, col))) || mod;
+                }
             }
         }
 
@@ -79,7 +87,7 @@ public class SubPropertyOfInferenceStepProvider extends InferenceStepProvider {
         if (matrix.matrix[row][col]) {
             return String.format("SubPropertyOf(%s, %s)", matrix.getNamingManager().getPropertyIRI(row),
                     matrix.getNamingManager()
-                          .getPropertyIRI(col));
+                            .getPropertyIRI(col));
         }
         return null;
     }
@@ -88,8 +96,10 @@ public class SubPropertyOfInferenceStepProvider extends InferenceStepProvider {
     public OWLAxiom getAxiom(Matrix matrix, int row, int col) {
         if (matrix.matrix[row][col]) {
             return factory.getOWLSubObjectPropertyOfAxiom(
-                    factory.getOWLObjectProperty(IRI.create(getIRIWithNamespace(matrix.getNamingManager().getPropertyIRI(row)))),
-                    factory.getOWLObjectProperty(IRI.create(getIRIWithNamespace(matrix.getNamingManager().getPropertyIRI(col)))));
+                    factory.getOWLObjectProperty(
+                            IRI.create(getIRIWithNamespace(matrix.getNamingManager().getPropertyIRI(row)))),
+                    factory.getOWLObjectProperty(
+                            IRI.create(getIRIWithNamespace(matrix.getNamingManager().getPropertyIRI(col)))));
         }
         return null;
     }

@@ -18,10 +18,12 @@ public class PropertyUnsatisfiabilityInferenceProvider extends InferenceStepProv
     private TRexReasoner reasoner;
     private OWLDataFactory factory;
     private Matrix matrix;
+    private boolean generateExplanations;
 
     @Override
     public void initMatrix(OWLOntology ontology, TRexReasoner reasoner, Matrix matrix) {
         this.reasoner = reasoner;
+        this.generateExplanations = reasoner.isGenerateExplanations();
         this.factory = ontology.getOWLOntologyManager().getOWLDataFactory();
         this.matrix = matrix;
 
@@ -48,31 +50,35 @@ public class PropertyUnsatisfiabilityInferenceProvider extends InferenceStepProv
                 int j = cood[1];
                 if (reasoner.propertyDomain.matrix[k][i] && reasoner.propertyDomain.matrix[k][j]) {
                     matrix.matrix[0][k] = true;
-                    OrExpression explDisjoint = reasoner.conceptDisjointness.getExplanation(i, j);
-                    OrExpression explDomainKI = reasoner.propertyDomain.getExplanation(k, i);
-                    OrExpression explDomainKJ = reasoner.propertyDomain.getExplanation(k, j);
+                    if (generateExplanations) {
+                        OrExpression explDisjoint = reasoner.conceptDisjointness.getExplanation(i, j);
+                        OrExpression explDomainKI = reasoner.propertyDomain.getExplanation(k, i);
+                        OrExpression explDomainKJ = reasoner.propertyDomain.getExplanation(k, j);
 
 
-                    OrExpression flattenedDomain = ExpressionMinimizer
-                            .flatten(explDomainKJ,
-                                    explDomainKI);
-                    OrExpression flattenedDomainDisjoint = ExpressionMinimizer.flatten(flattenedDomain,
-                            explDisjoint);
-                    matrix.addExplanation(0, k, flattenedDomainDisjoint);
+                        OrExpression flattenedDomain = ExpressionMinimizer
+                                .flatten(explDomainKJ,
+                                        explDomainKI);
+                        OrExpression flattenedDomainDisjoint = ExpressionMinimizer.flatten(flattenedDomain,
+                                explDisjoint);
+                        matrix.addExplanation(0, k, flattenedDomainDisjoint);
+                    }
                 }
                 if (reasoner.propertyRange.matrix[k][i] && reasoner.propertyRange.matrix[k][j]) {
                     matrix.matrix[0][k] = true;
-                    OrExpression explDisjoint = reasoner.conceptDisjointness.getExplanation(i, j);
-                    OrExpression explRangeKI = reasoner.propertyRange.getExplanation(k, i);
-                    OrExpression explRangeKJ = reasoner.propertyRange.getExplanation(k, j);
+                    if (generateExplanations) {
+                        OrExpression explDisjoint = reasoner.conceptDisjointness.getExplanation(i, j);
+                        OrExpression explRangeKI = reasoner.propertyRange.getExplanation(k, i);
+                        OrExpression explRangeKJ = reasoner.propertyRange.getExplanation(k, j);
 
 
-                    OrExpression flattenedRange = ExpressionMinimizer
-                            .flatten(explRangeKJ,
-                                    explRangeKI);
-                    OrExpression flattenedRangeDisjoint = ExpressionMinimizer.flatten(flattenedRange,
-                            explDisjoint);
-                    matrix.addExplanation(0, k, flattenedRangeDisjoint);
+                        OrExpression flattenedRange = ExpressionMinimizer
+                                .flatten(explRangeKJ,
+                                        explRangeKI);
+                        OrExpression flattenedRangeDisjoint = ExpressionMinimizer.flatten(flattenedRange,
+                                explDisjoint);
+                        matrix.addExplanation(0, k, flattenedRangeDisjoint);
+                    }
                 }
             }
         }

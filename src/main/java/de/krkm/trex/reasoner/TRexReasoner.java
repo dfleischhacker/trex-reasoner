@@ -35,6 +35,8 @@ public class TRexReasoner {
     public Matrix propertyRange;
     public Matrix propertyUnsatisfiability;
 
+    private boolean generateExplanations;
+
     private boolean conceptOnly;
 
     private HashMap<AxiomType, ArrayList<Matrix>> typeToMatrix = new HashMap<AxiomType, ArrayList<Matrix>>();
@@ -45,45 +47,58 @@ public class TRexReasoner {
     }
 
     /**
-     * Initializes the reasoner to perform inference on the given ontology.
+     * Initializes the reasoner to perform inference on the given ontology with explanation support enabled.
      *
      * @param ontology ontology to perform inference on
      */
     public TRexReasoner(OWLOntology ontology, boolean conceptOnly) {
+        this(ontology, conceptOnly, true);
+    }
+
+    /**
+     * Initializes the reasoner to perform inference on the given ontology.
+     *
+     * @param ontology             ontology to perform inference on
+     * @param generateExplanations if true explanation support is enabled otherwise disabled
+     */
+    public TRexReasoner(OWLOntology ontology, boolean conceptOnly, boolean generateExplanations) {
         this.conceptOnly = conceptOnly;
         this.ontology = ontology;
         dataFactory = ontology.getOWLOntologyManager().getOWLDataFactory();
         namingManager = new OntologyNamingManager(ontology);
         conceptSubsumption = new Matrix(ontology, this, namingManager, new SubClassOfInferenceStepProvider());
+        this.generateExplanations = generateExplanations;
         registerType(conceptSubsumption);
         materializeConceptSubsumption();
 
-        conceptDisjointness = new Matrix(ontology, this, namingManager, new ConceptDisjointnessInferenceStepProvider());
+        conceptDisjointness = new Matrix(ontology, this, namingManager, new ConceptDisjointnessInferenceStepProvider(),
+                generateExplanations);
         registerType(conceptDisjointness);
         materializeConceptDisjointness();
 
         if (!conceptOnly) {
-            propertySubsumption = new Matrix(ontology, this, namingManager, new SubPropertyOfInferenceStepProvider());
+            propertySubsumption = new Matrix(ontology, this, namingManager, new SubPropertyOfInferenceStepProvider(),
+                    generateExplanations);
             registerType(propertySubsumption);
             materializePropertySubsumption();
 
             propertyDisjointness = new Matrix(ontology, this, namingManager,
-                    new PropertyDisjointnessInferenceStepProvider());
+                    new PropertyDisjointnessInferenceStepProvider(), generateExplanations);
             registerType(propertyDisjointness);
             materializePropertyDisjointness();
 
             propertyDomain = new Matrix(ontology, this, namingManager,
-                    new PropertyDomainInferenceStepProvider());
+                    new PropertyDomainInferenceStepProvider(), generateExplanations);
             registerType(propertyDomain);
             materializePropertyDomain();
 
             propertyRange = new Matrix(ontology, this, namingManager,
-                    new PropertyRangeInferenceStepProvider());
+                    new PropertyRangeInferenceStepProvider(), generateExplanations);
             registerType(propertyRange);
             materializePropertyRange();
 
             propertyUnsatisfiability = new Matrix(ontology, this, namingManager,
-                    new PropertyUnsatisfiabilityInferenceProvider());
+                    new PropertyUnsatisfiabilityInferenceProvider(), generateExplanations);
             registerType(propertyUnsatisfiability);
             materializePropertyUnsatisfiability();
         }
@@ -281,6 +296,10 @@ public class TRexReasoner {
      * @return explanation for given axiom if axiom is entailed, otherwise null
      */
     public OrExpression getExplanation(OWLAxiom axiom) {
+        if (!generateExplanations) {
+            throw new UnsupportedOperationException(
+                    "Trying to retrieve explanations from an reasoner with disabled explanation support");
+        }
         if (!typeToMatrix.containsKey(axiom.getAxiomType())) {
             throw new UnsupportedOperationException(
                     "Reasoner unable to handle axiom type: " + axiom.getAxiomType());
@@ -438,10 +457,15 @@ public class TRexReasoner {
         return res;
     }
 
+    public boolean isGenerateExplanations() {
+        return generateExplanations;
+    }
+
     public Set<OWLObjectProperty> getPropertyCycles() {
         Set<OWLObjectProperty> res = new HashSet<OWLObjectProperty>();
         for (int i = 0; i < conceptSubsumption.dimensionCol; i++) {
             if (conceptSubsumption.get(i, i)) {
+
                 res.add(dataFactory.getOWLObjectProperty(IRI.create(namingManager.getPropertyIRI(i))));
             }
         }

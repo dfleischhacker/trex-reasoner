@@ -19,6 +19,7 @@ public class SubClassOfInferenceStepProvider extends InferenceStepProvider {
     private TRexReasoner reasoner;
     private OWLDataFactory factory;
     private Matrix matrix;
+    private boolean generateExplanations;
 
     @Override
     public void initMatrix(OWLOntology ontology, TRexReasoner reasoner, Matrix matrix) {
@@ -29,6 +30,7 @@ public class SubClassOfInferenceStepProvider extends InferenceStepProvider {
         this.matrix = matrix;
 
         this.reasoner = reasoner;
+        this.generateExplanations = reasoner.isGenerateExplanations();
         this.factory = ontology.getOWLOntologyManager().getOWLDataFactory();
         // stated subsumption
         for (OWLSubClassOfAxiom a : ontology.getAxioms(AxiomType.SUBCLASS_OF)) {
@@ -39,9 +41,11 @@ public class SubClassOfInferenceStepProvider extends InferenceStepProvider {
                     continue;
                 }
                 matrix.set(subClassIRI, superClassIRI, true);
-                int subId = matrix.getNamingManager().getConceptId(subClassIRI);
-                int superId = matrix.getNamingManager().getConceptId(superClassIRI);
-                matrix.addExplanation(subId, superId, or(and(literal(a.getAxiomWithoutAnnotations()))));
+                if (generateExplanations) {
+                    int subId = matrix.getNamingManager().getConceptId(subClassIRI);
+                    int superId = matrix.getNamingManager().getConceptId(superClassIRI);
+                    matrix.addExplanation(subId, superId, or(and(literal(a.getAxiomWithoutAnnotations()))));
+                }
             }
         }
 
@@ -75,9 +79,11 @@ public class SubClassOfInferenceStepProvider extends InferenceStepProvider {
 //        log.debug("Inferencing for {} {}", row, col);
         for (int i = 0; i < matrix.dimensionRow; i++) {
             if (matrix.matrix[row][i] && matrix.matrix[i][col]) {
-                matrix.set(row, col, true);
-                mod = matrix.addExplanation(row, col, ExpressionMinimizer
-                        .flatten(matrix.getExplanation(row, i), matrix.getExplanation(i, col))) || mod;
+                mod = matrix.set(row, col, true) || mod;
+                if (generateExplanations) {
+                    mod = matrix.addExplanation(row, col, ExpressionMinimizer
+                            .flatten(matrix.getExplanation(row, i), matrix.getExplanation(i, col))) || mod;
+                }
             }
         }
 
@@ -89,7 +95,7 @@ public class SubClassOfInferenceStepProvider extends InferenceStepProvider {
         if (matrix.matrix[row][col]) {
             return String.format("SubClassOf(%s, %s)", matrix.getNamingManager().getConceptIRI(row),
                     matrix.getNamingManager()
-                          .getConceptIRI(col));
+                            .getConceptIRI(col));
         }
         return null;
     }
