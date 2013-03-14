@@ -148,8 +148,23 @@ public class ConceptDisjointnessInferenceStepProvider extends InferenceStepProvi
         OrExpression overall = null;
         Set<OWLClass> disjointClassesSet = axiom.getClassesInSignature();
         OWLClass[] disjointClasses = disjointClassesSet.toArray(new OWLClass[disjointClassesSet.size()]);
+
+        if (disjointClasses.length == 1) {
+            int id = resolveRowIRI(Util.getFragment(disjointClasses[0].asOWLClass().getIRI().toString()));
+            if (matrix.get(id, id)) {
+                overall = matrix.getExplanation(id, id);
+
+                if (overall != null) {
+                    ExpressionMinimizer.minimize(overall);
+                }
+
+            }
+
+            return overall;
+        }
+
         for (int i = 0; i < disjointClasses.length; i++) {
-            for (int j = 0; j <= i; j++) {
+            for (int j = 0; j < i; j++) {
                 int idI = resolveRowIRI(Util.getFragment(disjointClasses[i].asOWLClass().getIRI().toString()));
                 int idJ = resolveColIRI(Util.getFragment(disjointClasses[j].asOWLClass().getIRI().toString()));
                 if (matrix.get(idI, idJ)) {
