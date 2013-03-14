@@ -124,9 +124,6 @@ public class PropertyDisjointnessInferenceStepProvider extends InferenceStepProv
                 new OWLObjectProperty[disjointPropertySet.size()]);
         for (int i = 0; i < disjointClasses.length; i++) {
             for (int j = 0; j < i; j++) {
-                if (i == j) {
-                    continue;
-                }
                 String iriI = Util.getFragment(disjointClasses[i].asOWLObjectProperty().getIRI().toString());
                 String iriJ = Util.getFragment(disjointClasses[j].asOWLObjectProperty().getIRI().toString());
                 res = matrix.get(iriI, iriJ) || res;
@@ -195,9 +192,6 @@ public class PropertyDisjointnessInferenceStepProvider extends InferenceStepProv
                 new OWLObjectProperty[disjointPropertySet.size()]);
         for (int i = 0; i < disjointClasses.length; i++) {
             for (int j = 0; j < i; j++) {
-                if (i == j) {
-                    continue;
-                }
                 String iriI = Util.getFragment(disjointClasses[i].asOWLObjectProperty().getIRI().toString());
                 String iriJ = Util.getFragment(disjointClasses[j].asOWLObjectProperty().getIRI().toString());
                 matrix.set(iriI, iriJ, true);

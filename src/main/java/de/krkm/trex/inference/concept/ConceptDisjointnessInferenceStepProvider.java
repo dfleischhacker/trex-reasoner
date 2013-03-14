@@ -34,9 +34,6 @@ public class ConceptDisjointnessInferenceStepProvider extends InferenceStepProvi
                 OWLClass[] disjointClasses = disjointClassesSet.toArray(new OWLClass[disjointClassesSet.size()]);
                 for (int i = 0; i < disjointClasses.length; i++) {
                     for (int j = 0; j < i; j++) {
-                        if (i == j) {
-                            continue;
-                        }
                         if (!disjointClasses[i].isAnonymous() && !disjointClasses[j].isAnonymous()) {
                             String iriI = Util.getFragment(disjointClasses[i].asOWLClass().getIRI().toString());
                             String iriJ = Util.getFragment(disjointClasses[j].asOWLClass().getIRI().toString());
@@ -124,9 +121,6 @@ public class ConceptDisjointnessInferenceStepProvider extends InferenceStepProvi
         OWLClass[] disjointClasses = disjointClassesSet.toArray(new OWLClass[disjointClassesSet.size()]);
         for (int i = 0; i < disjointClasses.length; i++) {
             for (int j = 0; j < i; j++) {
-                if (i == j) {
-                    continue;
-                }
                 String iriI = Util.getFragment(disjointClasses[i].asOWLClass().getIRI().toString());
                 String iriJ = Util.getFragment(disjointClasses[j].asOWLClass().getIRI().toString());
                 res = matrix.get(iriI, iriJ) || res;
@@ -194,9 +188,6 @@ public class ConceptDisjointnessInferenceStepProvider extends InferenceStepProvi
         OWLClass[] disjointClasses = disjointClassesSet.toArray(new OWLClass[disjointClassesSet.size()]);
         for (int i = 0; i < disjointClasses.length; i++) {
             for (int j = 0; j < i; j++) {
-                if (i == j) {
-                    continue;
-                }
                 String iriI = Util.getFragment(disjointClasses[i].asOWLClass().getIRI().toString());
                 String iriJ = Util.getFragment(disjointClasses[j].asOWLClass().getIRI().toString());
                 matrix.set(iriI, iriJ, true);
