@@ -306,10 +306,14 @@ public class TRexReasoner {
         }
         OrExpression explanation = null;
         for (Matrix relevantMatrix : typeToMatrix.get(axiom.getAxiomType())) {
+            OrExpression newExplanation = relevantMatrix.getExplanation(axiom);
+            if (newExplanation == null) {
+                continue;
+            }
             if (explanation == null) {
-                explanation = relevantMatrix.getExplanation(axiom).copy();
+                explanation = newExplanation.copy();
             } else {
-                explanation = ExpressionMinimizer.flatten(explanation, relevantMatrix.getExplanation(axiom));
+                explanation = ExpressionMinimizer.flatten(explanation, newExplanation);
             }
             ExpressionMinimizer.minimize(explanation);
         }
