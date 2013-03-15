@@ -214,14 +214,14 @@ public class Matrix {
      * @return true if the value has changed, i.e., was not val before
      */
     public boolean set(int indexA, int indexB, boolean val) {
-        if (matrix[indexA][indexB] == val) {
-            return false;
-        }
-
         if (isSymmetric && indexA < indexB) {
             int temp = indexB;
             indexB = indexA;
             indexA = temp;
+        }
+
+        if (matrix[indexA][indexB] == val) {
+            return false;
         }
 
         matrix[indexA][indexB] = val;
