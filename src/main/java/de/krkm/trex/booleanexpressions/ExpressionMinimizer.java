@@ -85,8 +85,8 @@ public class ExpressionMinimizer {
     /**
      * Creates and returns an OR-expression.
      *
-     * @param expressions
-     * @return
+     * @param expressions expression to combine by OR
+     * @return given expressions combined by OR
      */
     public static OrExpression or(AndExpression... expressions) {
         return new OrExpression(expressions);
