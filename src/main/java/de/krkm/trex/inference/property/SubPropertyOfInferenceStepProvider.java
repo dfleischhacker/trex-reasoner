@@ -23,12 +23,15 @@ public class SubPropertyOfInferenceStepProvider extends InferenceStepProvider {
     public void initMatrix(OWLOntology ontology, TRexReasoner reasoner, Matrix matrix) {
         int dimension = matrix.getNamingManager().getNumberOfProperties();
         matrix.setMatrix(new boolean[dimension][dimension]);
-        matrix.setExplanations(new OrExpression[dimension][dimension]);
+        this.generateExplanations = reasoner.isGenerateExplanations();
+
+        if (generateExplanations) {
+            matrix.setExplanations(new OrExpression[dimension][dimension]);
+        }
 
         this.matrix = matrix;
 
         this.reasoner = reasoner;
-        this.generateExplanations = reasoner.isGenerateExplanations();
         this.factory = ontology.getOWLOntologyManager().getOWLDataFactory();
         // stated subsumption
         for (OWLSubObjectPropertyOfAxiom a : ontology.getAxioms(AxiomType.SUB_OBJECT_PROPERTY)) {
@@ -142,6 +145,10 @@ public class SubPropertyOfInferenceStepProvider extends InferenceStepProvider {
 
     @Override
     public OrExpression getExplanation(OWLAxiom axiom) {
+        if (!generateExplanations) {
+            throw new UnsupportedOperationException(
+                    "Trying to retrieve explanations from an reasoner with disabled explanation support");
+        }
         isProcessable(axiom);
 
         OWLSubObjectPropertyOfAxiom a = (OWLSubObjectPropertyOfAxiom) axiom;
@@ -164,6 +171,9 @@ public class SubPropertyOfInferenceStepProvider extends InferenceStepProvider {
         matrix.set(subClassIRI, superClassIRI, true);
         int indexA = resolveRowIRI(subClassIRI);
         int indexB = resolveColIRI(superClassIRI);
-        matrix.addExplanation(indexA, indexB, or(and(literal(axiom))));
+
+        if (generateExplanations) {
+            matrix.addExplanation(indexA, indexB, or(and(literal(axiom))));
+        }
     }
 }

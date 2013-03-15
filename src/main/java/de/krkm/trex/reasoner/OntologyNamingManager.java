@@ -15,7 +15,7 @@ import java.util.Set;
  * Provides mappings from URIs contained in the ontology to numeric ids and vice-versa.
  */
 public class OntologyNamingManager {
-    private Logger log = LoggerFactory.getLogger(OntologyNamingManager.class);
+    private final Logger log = LoggerFactory.getLogger(OntologyNamingManager.class);
 
     private HashMap<String, Integer> classToId = new HashMap<String, Integer>();
     private HashMap<Integer, String> idToClass = new HashMap<Integer, String>();

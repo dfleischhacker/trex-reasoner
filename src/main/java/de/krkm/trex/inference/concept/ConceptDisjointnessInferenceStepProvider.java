@@ -27,7 +27,10 @@ public class ConceptDisjointnessInferenceStepProvider extends InferenceStepProvi
         this.factory = ontology.getOWLOntologyManager().getOWLDataFactory();
         int dimension = matrix.getNamingManager().getNumberOfConcepts();
         matrix.setMatrix(new boolean[dimension][dimension]);
-        matrix.setExplanations(new OrExpression[dimension][dimension]);
+
+        if (generateExplanations) {
+            matrix.setExplanations(new OrExpression[dimension][dimension]);
+        }
 
 
         Set<OWLDisjointClassesAxiom> disjointClassesAxiomSet = ontology.getAxioms(AxiomType.DISJOINT_CLASSES);
@@ -147,6 +150,11 @@ public class ConceptDisjointnessInferenceStepProvider extends InferenceStepProvi
 
     @Override
     public OrExpression getExplanation(OWLAxiom axiom) {
+        if (!generateExplanations) {
+            throw new UnsupportedOperationException(
+                    "Trying to retrieve explanations from an reasoner with disabled explanation support");
+        }
+
         isProcessable(axiom);
 
         OrExpression overall = null;
@@ -203,7 +211,9 @@ public class ConceptDisjointnessInferenceStepProvider extends InferenceStepProvi
                 matrix.set(iriI, iriJ, true);
                 int indexA = resolveRowIRI(iriI);
                 int indexB = resolveColIRI(iriJ);
-                matrix.addExplanation(indexA, indexB, or(and(literal(axiom))));
+                if (generateExplanations) {
+                    matrix.addExplanation(indexA, indexB, or(and(literal(axiom))));
+                }
             }
         }
     }

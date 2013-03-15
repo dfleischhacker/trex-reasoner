@@ -29,7 +29,10 @@ public class PropertyRangeInferenceStepProvider extends InferenceStepProvider {
         int dimensionCol = matrix.getNamingManager().getNumberOfConcepts();
         int dimensionRow = matrix.getNamingManager().getNumberOfProperties();
         matrix.setMatrix(new boolean[dimensionRow][dimensionCol]);
-        matrix.setExplanations(new OrExpression[dimensionRow][dimensionCol]);
+
+        if (generateExplanations) {
+            matrix.setExplanations(new OrExpression[dimensionRow][dimensionCol]);
+        }
 
         for (OWLObjectPropertyRangeAxiom a : ontology.getAxioms(AxiomType.OBJECT_PROPERTY_RANGE)) {
             if (!a.getProperty().isAnonymous() && !a.getRange().isAnonymous()) {
@@ -144,6 +147,10 @@ public class PropertyRangeInferenceStepProvider extends InferenceStepProvider {
 
     @Override
     public OrExpression getExplanation(OWLAxiom axiom) {
+        if (!generateExplanations) {
+            throw new UnsupportedOperationException(
+                    "Trying to retrieve explanations from an reasoner with disabled explanation support");
+        }
         isProcessable(axiom);
 
         OWLObjectPropertyRangeAxiom a = (OWLObjectPropertyRangeAxiom) axiom;
@@ -164,6 +171,8 @@ public class PropertyRangeInferenceStepProvider extends InferenceStepProvider {
         matrix.set(propertyIRI, rangeIRI, true);
         int indexA = resolveRowIRI(propertyIRI);
         int indexB = resolveColIRI(rangeIRI);
-        matrix.addExplanation(indexA, indexB, or(and(literal(axiom))));
+        if (generateExplanations) {
+            matrix.addExplanation(indexA, indexB, or(and(literal(axiom))));
+        }
     }
 }

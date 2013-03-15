@@ -30,7 +30,10 @@ public class PropertyDomainInferenceStepProvider extends InferenceStepProvider {
         int dimensionCol = matrix.getNamingManager().getNumberOfConcepts();
         int dimensionRow = matrix.getNamingManager().getNumberOfProperties();
         matrix.setMatrix(new boolean[dimensionRow][dimensionCol]);
-        matrix.setExplanations(new OrExpression[dimensionRow][dimensionCol]);
+
+        if (generateExplanations) {
+            matrix.setExplanations(new OrExpression[dimensionRow][dimensionCol]);
+        }
 
         for (OWLObjectPropertyDomainAxiom a : ontology.getAxioms(AxiomType.OBJECT_PROPERTY_DOMAIN)) {
             if (!a.getProperty().isAnonymous() && !a.getDomain().isAnonymous()) {
@@ -148,6 +151,10 @@ public class PropertyDomainInferenceStepProvider extends InferenceStepProvider {
 
     @Override
     public OrExpression getExplanation(OWLAxiom axiom) {
+        if (!generateExplanations) {
+            throw new UnsupportedOperationException(
+                    "Trying to retrieve explanations from an reasoner with disabled explanation support");
+        }
         isProcessable(axiom);
 
         OWLObjectPropertyDomainAxiom a = (OWLObjectPropertyDomainAxiom) axiom;
@@ -168,6 +175,8 @@ public class PropertyDomainInferenceStepProvider extends InferenceStepProvider {
         matrix.set(propertyIRI, domainIRI, true);
         int indexA = resolveRowIRI(propertyIRI);
         int indexB = resolveColIRI(domainIRI);
-        matrix.addExplanation(indexA, indexB, or(and(literal(axiom))));
+        if (generateExplanations) {
+            matrix.addExplanation(indexA, indexB, or(and(literal(axiom))));
+        }
     }
 }

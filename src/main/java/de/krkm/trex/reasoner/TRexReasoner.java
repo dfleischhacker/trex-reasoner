@@ -66,8 +66,9 @@ public class TRexReasoner {
         this.ontology = ontology;
         dataFactory = ontology.getOWLOntologyManager().getOWLDataFactory();
         namingManager = new OntologyNamingManager(ontology);
-        conceptSubsumption = new Matrix(ontology, this, namingManager, new SubClassOfInferenceStepProvider());
         this.generateExplanations = generateExplanations;
+
+        conceptSubsumption = new Matrix(ontology, this, namingManager, new SubClassOfInferenceStepProvider());
         registerType(conceptSubsumption);
         materializeConceptSubsumption();
 

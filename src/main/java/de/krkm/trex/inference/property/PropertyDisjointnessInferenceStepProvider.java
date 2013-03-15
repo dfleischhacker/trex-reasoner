@@ -24,10 +24,13 @@ public class PropertyDisjointnessInferenceStepProvider extends InferenceStepProv
         this.matrix = matrix;
         int dimension = matrix.getNamingManager().getNumberOfProperties();
         matrix.setMatrix(new boolean[dimension][dimension]);
-        matrix.setExplanations(new OrExpression[dimension][dimension]);
+        this.generateExplanations = reasoner.isGenerateExplanations();
+
+        if (generateExplanations) {
+            matrix.setExplanations(new OrExpression[dimension][dimension]);
+        }
 
         this.reasoner = reasoner;
-        this.generateExplanations = reasoner.isGenerateExplanations();
         this.factory = ontology.getOWLOntologyManager().getOWLDataFactory();
         Set<OWLDisjointObjectPropertiesAxiom> disjointPropertyAxiomSet = ontology.getAxioms(
                 AxiomType.DISJOINT_OBJECT_PROPERTIES);
@@ -148,6 +151,10 @@ public class PropertyDisjointnessInferenceStepProvider extends InferenceStepProv
 
     @Override
     public OrExpression getExplanation(OWLAxiom axiom) {
+        if (!generateExplanations) {
+            throw new UnsupportedOperationException(
+                    "Trying to retrieve explanations from an reasoner with disabled explanation support");
+        }
         isProcessable(axiom);
 
         OrExpression overall = null;
@@ -170,13 +177,14 @@ public class PropertyDisjointnessInferenceStepProvider extends InferenceStepProv
 
         for (int i = 0; i < disjointProperties.length; i++) {
             for (int j = 0; j < i; j++) {
-                int idI = resolveRowIRI(Util.getFragment(disjointProperties[i].asOWLObjectProperty().getIRI().toString()));
-                int idJ = resolveColIRI(Util.getFragment(disjointProperties[j].asOWLObjectProperty().getIRI().toString()));
+                int idI = resolveRowIRI(
+                        Util.getFragment(disjointProperties[i].asOWLObjectProperty().getIRI().toString()));
+                int idJ = resolveColIRI(
+                        Util.getFragment(disjointProperties[j].asOWLObjectProperty().getIRI().toString()));
                 if (matrix.get(idI, idJ)) {
                     if (overall == null) {
                         overall = matrix.getExplanation(idI, idJ);
-                    }
-                    else {
+                    } else {
                         System.out.println("Adding to overall: " + overall.toString());
                         overall = ExpressionMinimizer.flatten(overall,
                                 matrix.getExplanation(idI, idJ));
@@ -206,7 +214,9 @@ public class PropertyDisjointnessInferenceStepProvider extends InferenceStepProv
                 matrix.set(iriI, iriJ, true);
                 int indexA = resolveRowIRI(iriI);
                 int indexB = resolveColIRI(iriJ);
-                matrix.addExplanation(indexA, indexB, or(and(literal(axiom))));
+                if (generateExplanations) {
+                    matrix.addExplanation(indexA, indexB, or(and(literal(axiom))));
+                }
             }
         }
     }

@@ -16,9 +16,8 @@ public class OntologyReader {
 
     public static OWLOntology loadOntology(FileInputStream input) throws OWLOntologyCreationException {
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        OWLOntology ontology = manager.loadOntologyFromOntologyDocument(input);
 
-        return ontology;
+        return manager.loadOntologyFromOntologyDocument(input);
     }
 
     public static OWLOntology loadOntology(File file) throws FileNotFoundException, OWLOntologyCreationException {

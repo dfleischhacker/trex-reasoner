@@ -31,7 +31,10 @@ public class PropertyUnsatisfiabilityInferenceProvider extends InferenceStepProv
         // a combination of concept disjointness and domain or range restrictions
         int dimension = matrix.getNamingManager().getNumberOfProperties();
         matrix.setMatrix(new boolean[1][dimension]);
-        matrix.setExplanations(new OrExpression[1][dimension]);
+
+        if (generateExplanations) {
+            matrix.setExplanations(new OrExpression[1][dimension]);
+        }
 
 
         // create list of disjoint concepts
@@ -149,6 +152,10 @@ public class PropertyUnsatisfiabilityInferenceProvider extends InferenceStepProv
 
     @Override
     public OrExpression getExplanation(OWLAxiom axiom) {
+        if (!generateExplanations) {
+            throw new UnsupportedOperationException(
+                    "Trying to retrieve explanations from an reasoner with disabled explanation support");
+        }
         isProcessable(axiom);
 
         ArrayList<OWLObjectProperty> objectProperties = new ArrayList<OWLObjectProperty>(

@@ -25,12 +25,15 @@ public class SubClassOfInferenceStepProvider extends InferenceStepProvider {
     public void initMatrix(OWLOntology ontology, TRexReasoner reasoner, Matrix matrix) {
         int dimension = matrix.getNamingManager().getNumberOfConcepts();
         matrix.setMatrix(new boolean[dimension][dimension]);
-        matrix.setExplanations(new OrExpression[dimension][dimension]);
+        this.generateExplanations = reasoner.isGenerateExplanations();
+
+        if (generateExplanations) {
+            matrix.setExplanations(new OrExpression[dimension][dimension]);
+        }
 
         this.matrix = matrix;
 
         this.reasoner = reasoner;
-        this.generateExplanations = reasoner.isGenerateExplanations();
         this.factory = ontology.getOWLOntologyManager().getOWLDataFactory();
         // stated subsumption
         for (OWLSubClassOfAxiom a : ontology.getAxioms(AxiomType.SUBCLASS_OF)) {
@@ -65,8 +68,9 @@ public class SubClassOfInferenceStepProvider extends InferenceStepProvider {
                         String iriJ = Util.getFragment(equivalentClasses[j].asOWLClass().getIRI().toString());
                         int idJ = matrix.getNamingManager().getConceptId(iriJ);
                         matrix.set(iriI, iriJ, true);
-                        matrix.addExplanation(idI, idJ,
-                                or(and(literal(p))));
+                        if (generateExplanations) {
+                            matrix.addExplanation(idI, idJ, or(and(literal(p))));
+                        }
                     }
                 }
             }
@@ -94,8 +98,7 @@ public class SubClassOfInferenceStepProvider extends InferenceStepProvider {
     public String getAxiomRepresentation(Matrix matrix, int row, int col) {
         if (matrix.matrix[row][col]) {
             return String.format("SubClassOf(%s, %s)", matrix.getNamingManager().getConceptIRI(row),
-                    matrix.getNamingManager()
-                            .getConceptIRI(col));
+                    matrix.getNamingManager().getConceptIRI(col));
         }
         return null;
     }
@@ -148,6 +151,10 @@ public class SubClassOfInferenceStepProvider extends InferenceStepProvider {
 
     @Override
     public OrExpression getExplanation(OWLAxiom axiom) {
+        if (!generateExplanations) {
+            throw new UnsupportedOperationException(
+                    "Trying to retrieve explanations from an reasoner with disabled explanation support");
+        }
         isProcessable(axiom);
 
         OWLSubClassOfAxiom a = (OWLSubClassOfAxiom) axiom;
@@ -167,7 +174,9 @@ public class SubClassOfInferenceStepProvider extends InferenceStepProvider {
         String superClassIRI = Util.getFragment(a.getSuperClass().asOWLClass().getIRI().toString());
         int indexA = resolveRowIRI(subClassIRI);
         int indexB = resolveColIRI(superClassIRI);
-        matrix.addExplanation(indexA, indexB, or(and(literal(axiom))));
+        if (generateExplanations) {
+            matrix.addExplanation(indexA, indexB, or(and(literal(axiom))));
+        }
         matrix.set(subClassIRI, superClassIRI, true);
     }
 }

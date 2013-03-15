@@ -17,8 +17,6 @@ import java.util.Set;
  * Base class for concept level inference
  */
 public class Matrix {
-    private OWLOntology ontology;
-    private TRexReasoner reasoner;
     private InferenceStepProvider inferenceStep;
 
     private OntologyNamingManager namingManager;
@@ -58,8 +56,6 @@ public class Matrix {
      */
     public Matrix(OWLOntology ontology, TRexReasoner reasoner, OntologyNamingManager namingManager,
             InferenceStepProvider inferenceStep, boolean generateExplanations) {
-        this.ontology = ontology;
-        this.reasoner = reasoner;
         this.inferenceStep = inferenceStep;
         this.namingManager = namingManager;
         this.isSymmetric = inferenceStep.isSymmetric();
@@ -298,7 +294,8 @@ public class Matrix {
             for (int j = 0; j < (isSymmetric ? i : dimensionCol); j++) {
                 String axiom = inferenceStep.getAxiomRepresentation(this, i, j);
                 if (axiom != null) {
-                    sb.append(axiom).append(" -- ").append(explanations[i][j].toString()).append("\n");
+                    sb.append(axiom).append(" -- ").append(explanations != null ? explanations[i][j].toString() : "")
+                            .append("\n");
                 }
             }
         }
