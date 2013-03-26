@@ -76,6 +76,9 @@ public class ExpressionMinimizer {
                     andAlreadyIt.remove();
                     toAdd.addExpression(andAdd);
                 }
+                else {
+                    toAdd.addExpression(andAdd);
+                }
             }
         }
         alreadyCopy.getExpressions().addAll(toAdd.getExpressions());

@@ -314,7 +314,8 @@ public class TRexReasoner {
             if (explanation == null) {
                 explanation = newExplanation.copy();
             } else {
-                explanation = ExpressionMinimizer.flatten(explanation, newExplanation);
+                //explanation = ExpressionMinimizer.flatten(explanation, newExplanation);
+                explanation = ExpressionMinimizer.minimize(explanation, newExplanation);
             }
             ExpressionMinimizer.minimize(explanation);
         }
