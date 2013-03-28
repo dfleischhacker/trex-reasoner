@@ -158,12 +158,25 @@ a.button span {
 #download-tar-gz span {
   background: transparent url(../images/tar-gz-icon.png) 12px 50% no-repeat;
 }
+#download-full span {
+  background: transparent url(../images/owl-icon.png) 12px 50% no-repeat;
+}
+#download-cleaned span {
+  background: transparent url(../images/owl-icon.png) 12px 50% no-repeat;
+}
+#download-rr2013 span {
+  background: transparent url(../images/owl-icon.png) 12px 50% no-repeat;
+}
+#download-rr2013 {
+  margin-right: 0;
+}
 #view-on-github span {
   background: transparent url(../images/octocat-icon.png) 12px 50% no-repeat;
 }
 #view-on-github {
   margin-right: 0;
 }
+
 
 code, pre {
   font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal;
