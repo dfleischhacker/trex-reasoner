@@ -323,6 +323,28 @@ public class TRexReasoner {
     }
 
     /**
+     * Returns the explanation for the unsatisfiability of the given concept. If the concept is not unsatisfiable null
+     * is returned.
+     *
+     * @param concept unsatisfiable concept
+     * @return explanation for the unsatisfiability of the given concept
+     */
+    public OrExpression getUnsatisfiabilityExplanation(OWLClass concept) {
+        return getExplanation(dataFactory.getOWLDisjointClassesAxiom(concept, concept));
+    }
+
+    /**
+     * Returns the explanation for the unsatisfiability of the given object property. If the property is not
+     * unsatisfiable null is returned.
+     *
+     * @param property unsatisfiable concept
+     * @return explanation for the unsatisfiability of the given property
+     */
+    public OrExpression getUnsatisfiabilityExplanation(OWLObjectProperty property) {
+        return getExplanation(dataFactory.getOWLDisjointObjectPropertiesAxiom(property, property));
+    }
+
+    /**
      * Returns true if the concept identified by the IRI <code>subClass</code> is a subconcept of the concept identified
      * by the IRI <code>superClass</code>.
      *
