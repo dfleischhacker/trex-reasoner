@@ -59,6 +59,7 @@ public class TRexReasoner {
      * Initializes the reasoner to perform inference on the given ontology.
      *
      * @param ontology             ontology to perform inference on
+     * @param conceptOnly if true, only concept reasoning is enabled, otherwise also property
      * @param generateExplanations if true explanation support is enabled otherwise disabled
      */
     public TRexReasoner(OWLOntology ontology, boolean conceptOnly, boolean generateExplanations) {
@@ -441,7 +442,7 @@ public class TRexReasoner {
      *
      * @return set of all unsatisfiable classes
      */
-    public Set<OWLClass> getIncoherentClasses() {
+    public Set<OWLClass> getUnsatisfiableClasses() {
         Set<OWLClass> res = new HashSet<OWLClass>();
         for (int i = 0; i < conceptDisjointness.dimensionCol; i++) {
             if (conceptDisjointness.get(i, i)) {
@@ -457,7 +458,7 @@ public class TRexReasoner {
      *
      * @return set of all unsatisfiable properties
      */
-    public Set<OWLObjectProperty> getIncoherentProperties() {
+    public Set<OWLObjectProperty> getUnsatisfiableProperties() {
         Set<OWLObjectProperty> res = new HashSet<OWLObjectProperty>();
         for (int i = 0; i < propertyDisjointness.dimensionCol; i++) {
             if (propertyDisjointness.get(i, i)) {
