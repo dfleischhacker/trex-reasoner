@@ -13,7 +13,8 @@ Usage
 -----
 At the moment TRex is a only library, i.e., it does not bring a command-line interface. However, using TRex is
 straight-forward. The entry point for all operations is the TRexReasoner class. It provides a number of different
-methods for accessing TRex' functionality. See the class Example.java for an example of using TRex.
+methods for accessing TRex' functionality. See the class Example.java (src/main/java/de/krkm/trex/examples/Example1.java)
+for an example of using TRex.
 
 License
 -------
