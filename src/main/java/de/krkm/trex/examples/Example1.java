@@ -4,6 +4,7 @@ import de.krkm.trex.reasoner.TRexReasoner;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 
+import java.io.File;
 import java.util.Set;
 
 /**
@@ -12,7 +13,7 @@ import java.util.Set;
 public class Example1 {
     public static void main(String[] args) throws OWLOntologyCreationException {
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        OWLOntology ontology = manager.loadOntologyFromOntologyDocument(IRI.create("/home/trex/myontology.owl"));
+        OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File("/home/trex/myontology.owl"));
 
         // init TRex with all features enabled
         TRexReasoner trex = new TRexReasoner(ontology);
