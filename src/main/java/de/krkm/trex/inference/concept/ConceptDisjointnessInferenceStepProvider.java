@@ -36,7 +36,7 @@ public class ConceptDisjointnessInferenceStepProvider extends InferenceStepProvi
         Set<OWLDisjointClassesAxiom> disjointClassesAxiomSet = ontology.getAxioms(AxiomType.DISJOINT_CLASSES);
         for (OWLDisjointClassesAxiom a : disjointClassesAxiomSet) {
             for (OWLDisjointClassesAxiom p : a.asPairwiseAxioms()) {
-                Set<OWLClass> disjointClassesSet = a.getClassesInSignature();
+                Set<OWLClass> disjointClassesSet = p.getClassesInSignature();
                 OWLClass[] disjointClasses = disjointClassesSet.toArray(new OWLClass[disjointClassesSet.size()]);
                 for (int i = 0; i < disjointClasses.length; i++) {
                     for (int j = 0; j < i; j++) {
@@ -48,14 +48,12 @@ public class ConceptDisjointnessInferenceStepProvider extends InferenceStepProvi
                                 int idI = matrix.getNamingManager().getConceptId(iriI);
                                 int idJ = matrix.getNamingManager().getConceptId(iriJ);
                                 matrix.set(iriI, iriJ, true);
-                                matrix.addExplanation(idI, idJ, or(and(literal(p.getAxiomWithoutAnnotations()))));
+                                matrix.addExplanation(idI, idJ, or(and(literal(a.getAxiomWithoutAnnotations()))));
                             }
                         }
                     }
                 }
             }
-
-
         }
     }
 
