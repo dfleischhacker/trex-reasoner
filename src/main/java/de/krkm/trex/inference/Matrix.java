@@ -95,7 +95,12 @@ public class Matrix {
     public void setMatrix(boolean[][] matrix) {
         this.matrix = matrix;
         this.dimensionRow = matrix.length;
-        this.dimensionCol = matrix[0].length;
+        if (this.dimensionRow == 0) {
+            this.dimensionCol = 0;
+        }
+        else {
+            this.dimensionCol = matrix[0].length;
+        }
     }
 
     public void setExplanations(OrExpression[][] explanations) {
